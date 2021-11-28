@@ -12,10 +12,11 @@ keepSuperscripts = False
 # TODO - handle 3.5 skills and tag 3.5 monsters (skipping for now)
 # TODO - investigate URLs that appear multiple times in monster list
 # TODO - investigate pages with multiple statblocks (e.g. mammoth rider NPC)
-# TODO - check creatures with no base land speed (if those exist)
 # TODO - the current handling of \r and other weird newlines introduces a lot of spaces in the wrong places. Need better solution. See Lastwall Border Scout
 # TODO - make sure the dash in At-will doesn't break things in spells, spell like abilities, etc.
 # TODO - fix racial modifiers all around, including giving it similar _other structure to skills (try on Demonic Deadfall Scorpion)
+# TODO - go over each attribute to see its unique values and locate errors (e.g. there's at least one in speeds)
+# TODO - go over the TBD broken urls, and check if non-TBD ones I submitted requests for were updated
 
 
 #####################
@@ -296,14 +297,36 @@ def parsePage(html):
 	# Get speed
 	assert e[i].name == "b" and e[i].get_text() == "Speed", url
 	i += 1
-	entries = collectText(["br"]).split(", ")
+	s = collectText(["br"])
+	# Handle entries like Solar that have one set of speeds normally and another in armor
+	parts = re.split(r'; (?![^()]*\))', s) # Use a special split to avoid splitting on semicolons inside parens
+	assert len(parts) <= 2, url
+	s = parts[0]
+	entries = re.split(r', (?![^()]*\))', s) # Use a special split to avoid splitting on commas inside parens
 	pageObject["speeds"] = {}
-	for entry in entries[1:]: # Skip base speed
-		if "ft." in entry:
-			pageObject["speeds"][entry[:entry.find(" ")]] = entry[entry.find(" ")+1:]
+	for j, entry in enumerate(entries):
+		result = re.search(r'^\s*(?:(.+?)\s+)?(\d+)\s*ft\s*\.\s*(?:\((.+?)\))?$', entry.strip())
+		if not result is None:
+			t = result.group(1)
+			if j != 0:
+				assert t is not None, url
+			elif t is None:
+				t = "base"
+			t = t.lower()
+			pageObject["speeds"][t] = parseInt(result.group(2))
+			if result.group(3) is not None:
+				t2 = t + "_other"
+				v = result.group(3).strip()
+				if t == "fly" and v.lower() in ["clumsy", "poor", "average", "good", "perfect"]:
+					v = v.lower()
+					t2 = "fly_maneuverability"
+				pageObject["speeds"][t2] = v
 		else:
-			pageObject["speeds"][entry] = entry # Non-numeric entries like "air walk"
-	pageObject["speeds"]["base"] = entries[0].strip() # Handle base speed separately. Skip leading space
+			pageObject["speeds"][entry.strip()] = entry.strip()
+
+		if len(parts) > 1:
+			pageObject["speeds"]["other"] = parts[1].strip()
+
 	skipBr()
 
 	# Get melee attacks if present
