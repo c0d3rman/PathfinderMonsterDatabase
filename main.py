@@ -15,10 +15,10 @@ keepSuperscripts = False
 # TODO - the current handling of \r and other weird newlines introduces a lot of spaces in the wrong places. Need better solution. See Lastwall Border Scout
 # TODO - make sure the dash in At-will doesn't break things in spells, spell like abilities, etc.
 # TODO - fix racial modifiers all around, including giving it similar _other structure to skills (try on Demonic Deadfall Scorpion)
-# TODO - go over each attribute to see its unique values and locate errors (e.g. there's at least one in speeds)
 # TODO - go over the TBD broken urls, and check if non-TBD ones I submitted requests for were updated
 # TODO - add mythic monsters, which requires modifying the CR regex to parse MR and also getting the actual URLs from https://aonprd.com/MythicMonsters.aspx?Letter=All
-# TODO - probably change cleanS to use strip
+# TODO - handle non-ascii characters in melee attack parentheticals
+
 
 
 #####################
@@ -36,7 +36,7 @@ from tqdm import tqdm
 
 def parseInt(s, stringIfFail=False):
 	def _parseInt(s):
-		return int(s.strip().replace("–", "-").replace("—", "-").replace("−", "-").replace(",", "").replace("+ ", "+").replace("- ", "-"))
+		return int(re.sub(r'[−—–-]', "-", s.strip()).replace(",", "").replace("+ ", "+").replace("- ", "-"))
 
 	if stringIfFail:
 		try:
@@ -380,7 +380,7 @@ def parsePage(html):
 			group_list = []
 			for entry in entries:
 				entry = entry.strip()
-				attack_dict = {}
+				attack_dict = {"text": entry}
 
 				# First, process the body and separate the parenthetical
 				result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+−—–-]\d+/)*[+−—–-]\d+)?(?:\s+(touch|melee))?\s*\(([^)]+)\)$', entry)
@@ -394,18 +394,83 @@ def parsePage(html):
 					attack_dict["touch"] = True
 
 				# Now, process the parenthetical
-				attack_dict["p"] = result.group(5)
+				p = result.group(5).strip()
+				result = re.search(r'^(\d+(?:d\d+)?(?:[+−—–-]\d+)?)?\s*(?:/(\d+\s*[−—–-]\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?$', p)
+				if result is None:
+					attack_dict["effects"] = p
+				else:
+					if result.group(1) is None:
+						assert result.group(2) is None and result.group(3) is None and result.group(4) is None and result.group(6) is None, url
+					else:
+						attack_dict["damage"] = result.group(1)
+						if not result.group(2) is None:
+							attack_dict["crit_range"] = re.sub(r'[−—–-]', "-", result.group(2))
+						if not result.group(3) is None:
+							attack_dict["crit_multiplier"] = parseInt(result.group(3))
+						if not result.group(4) is None or not result.group(6) is None:
+							assert result.group(4) is None or result.group(6) is None, urls # Can't have both at the same time, so make sure one is None
+							if result.group(4) is None:
+								attack_dict["damage_type"] = result.group(6)
+							else:
+								attack_dict["damage_type"] = result.group(4)
+						if not result.group(5) is None:
+							attack_dict["effects"] = result.group(5)
+						
+
 
 				group_list.append(attack_dict)
-				#^(\d+)?\s*([^(]+?)\s*((?:[+−—–-]\d+\/)*[+−—–-]\d+)(?:\s+(touch))?\s*\((\d+d\d+(?:[+−—–-]\d+)?)(?:\s*\/(\d+[−—–-]\d+))?(?:\s*\/([×x]\d))?(?:\s+([^)]+?))?(?:\s*plus ([^)]+?))?\)$
 				
 			pageObject["attacks_melee"].append(group_list)
-		
-
+	
 	# Get ranged attacks if present
 	if e[i].name == "b" and e[i].get_text() == "Ranged":
 		i += 1
-		pageObject["attacks_ranged"] = collectText(["h3", "b"]).strip() # Strip leading space if present
+		pageObject["attacks_ranged"] = []
+		groups = splitP(collectText(["h3", "b"]).strip(), sep=r'[;,]?\s+or\s+')
+		for group in groups:
+			entries = splitP(group.strip())
+			group_list = []
+			for entry in entries:
+				entry = entry.strip()
+				attack_dict = {"text": entry}
+
+				# First, process the body and separate the parenthetical
+				result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+−—–-]\d+/)*[+−—–-]\d+)?(?:\s+(?:ranged\s+)?(touch))?\s*(?:\(([^)]+)\))?$', entry)
+				assert not result is None, "Ranged Attack Regex 1 failed for " + url
+				if not result.group(1) is None:
+					attack_dict["count"] = parseInt(result.group(1))
+				attack_dict["attack"] = result.group(2)
+				if not result.group(3) is None:
+					attack_dict["bonus"] = [parseInt(x) for x in splitP(result.group(3), sep=r'/')]
+				if result.group(4) == "touch":
+					attack_dict["touch"] = True
+
+				# Now, process the parenthetical
+				if not result.group(5) is None:
+					p = result.group(5).strip()
+					result = re.search(r'^(\d+(?:d\d+)?(?:[+−—–-]\d+)?)?\s*(?:/(\d+\s*[−—–-]\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?$', p)
+					if result is None:
+						attack_dict["effects"] = p
+					else:
+						if result.group(1) is None:
+							assert result.group(2) is None and result.group(3) is None and result.group(4) is None and result.group(6) is None, url
+						else:
+							attack_dict["damage"] = result.group(1)
+							if not result.group(2) is None:
+								attack_dict["crit_range"] = re.sub(r'[−—–-]', "-", result.group(2))
+							if not result.group(3) is None:
+								attack_dict["crit_multiplier"] = parseInt(result.group(3))
+							if not result.group(4) is None or not result.group(6) is None:
+								assert result.group(4) is None or result.group(6) is None, urls # Can't have both at the same time, so make sure one is None
+								if result.group(4) is None:
+									attack_dict["damage_type"] = result.group(6)
+								else:
+									attack_dict["damage_type"] = result.group(4)
+							if not result.group(5) is None:
+								attack_dict["effects"] = result.group(5)
+
+				group_list.append(attack_dict)
+			pageObject["attacks_ranged"].append(group_list)
 
 	# Get space if present
 	if e[i].name == "b" and e[i].get_text() == "Space":
@@ -916,9 +981,6 @@ if __name__ == "__main__":
 		if url in broken_urls:
 			continue
 
-		# if not url in ["https://aonprd.com/MonsterDisplay.aspx?ItemName=Lizardfolk"]:
-		# 	continue
-
 		with open(sys.argv[1] + "/" + str(i) + ".html") as file:
 			html = file.read()
 
@@ -929,8 +991,6 @@ if __name__ == "__main__":
 			_, _, tb = sys.exc_info()
 			traceback.print_tb(tb)
 			print(type(e).__name__ + ": " + str(e))
-
-	# print(json.dumps(pageObjects, indent=2))
 
 	with open(sys.argv[1] + '/data.json', 'w') as fp:
 		json.dump(pageObjects, fp)
