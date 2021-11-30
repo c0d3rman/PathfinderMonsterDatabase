@@ -36,7 +36,7 @@ from tqdm import tqdm
 
 def parseInt(s, stringIfFail=False):
 	def _parseInt(s):
-		return int(re.sub(r'[−—–-]', "-", s.strip()).replace(",", "").replace("+ ", "+").replace("- ", "-"))
+		return s.strip().replace(",", "").replace("+ ", "+").replace("- ", "-")
 
 	if stringIfFail:
 		try:
@@ -50,6 +50,7 @@ def parsePage(html):
 	# Clean up HTML
 	html = html.replace("\r\n", " ").replace("\r", " ").replace(chr(10), " ").replace('\xad', '') # Fix weird whitespace in some entries (e.g. Vermlek, Achaierai, Signifer of the Nail, Vampiric Mist)
 	html = re.sub(r'(?<!<\s*br\s*>\s*)<\s*/\s*br\s*>', r'<br/>', html) # Fix broken <br> tags in some pages, e.g. Vilderavn. Uses a variable-width negative lookbehind, so we use the regex module instead of the re module
+	html = re.sub(r'[−—–‐‑‒―]|&ndash;|&mdash;', "-", html) # No reason to deal with all these different dashes
 
 	soup = BeautifulSoup(html, "html.parser")
 
@@ -121,11 +122,11 @@ def parsePage(html):
 
 	# Get statblock title & CR
 	assert e[i].name == "h2" and e[i]['class'] == ['title'], url
-	result = re.search(r'^(.+) CR ([0-9/−—–-]+)$', e[i].get_text())
+	result = re.search(r'^(.+) CR ([0-9/-]+)$', e[i].get_text())
 	assert not result is None, "CR-finding Regex failed for " + url
 	pageObject["title2"] = result.group(1)
 	pageObject["CR"] = parseInt(result.group(2), stringIfFail=True)
-	if type(pageObject["CR"]) is str and len(pageObject["CR"]) == 1 and pageObject["CR"] in "−—–-":
+	if pageObject["CR"] == "-":
 		pageObject["CR"] = None
 	i += 1
 
@@ -179,7 +180,7 @@ def parsePage(html):
 	assert e[i].name == "b" and e[i].get_text() == "Init", url
 	i += 1
 	assert isinstance(e[i], NavigableString), url
-	result = re.search(r'^ ([+−—–-][\d,]+(?: \(.+?\))?); ', e[i])
+	result = re.search(r'^ ([+-][\d,]+(?: \(.+?\))?); ', e[i])
 	assert not result is None, "Initiative Regex failed for " + url
 	pageObject["initiative"] = parseInt(result.group(1), stringIfFail=True)
 	i += 1
@@ -187,7 +188,7 @@ def parsePage(html):
 	# Get senses
 	assert e[i].name == "b" and e[i].get_text() == "Senses", url
 	i += 1
-	result = re.search(r'^(?: (.+)[;,])? *Perception ([+−—–-] ?[\d,]+)', collectText(["h3", "br"])) # Regex handles broken formatting on pages like Demonologist that use a comma instead of a semicolon. Space before Perception is variable length because of the typos in Elder Air Elemental and Scarlet Walker, and space inside number because of Mirror Serpent
+	result = re.search(r'^(?: (.+)[;,])? *Perception ([+-] ?[\d,]+)', collectText(["h3", "br"])) # Regex handles broken formatting on pages like Demonologist that use a comma instead of a semicolon. Space before Perception is variable length because of the typos in Elder Air Elemental and Scarlet Walker, and space inside number because of Mirror Serpent
 	assert not result is None, "Senses Regex failed for " + url
 	perceptionSkill = parseInt(result.group(2), stringIfFail=True) # Save perception skill to combine with skills section later
 	if result.group(1) is not None:
@@ -230,7 +231,7 @@ def parsePage(html):
 		pageObject["AC_components"] = {}
 		for entry in entries:
 			entry = entry.strip() # Fixes whitespace issues in e.g. Malsandra (probably caused by \r handling)
-			result = re.search(r'^([+−—–-]\d+)\s+(.+)$', entry)
+			result = re.search(r'^([+-]\d+)\s+(.+)$', entry)
 			if not result is None:
 				pageObject["AC_components"][result.group(2).lower().strip()] = parseInt(result.group(1))
 			else:
@@ -383,7 +384,7 @@ def parsePage(html):
 				attack_dict = {"text": entry}
 
 				# First, process the body and separate the parenthetical
-				result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+−—–-]\d+/)*[+−—–-]\d+)?(?:\s+(touch|melee))?\s*\(([^)]+)\)$', entry)
+				result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+(touch|melee))?\s*\(([^)]+)\)$', entry)
 				assert not result is None, "Melee Attack Regex 1 failed for " + url
 				if not result.group(1) is None:
 					attack_dict["count"] = parseInt(result.group(1))
@@ -395,7 +396,7 @@ def parsePage(html):
 
 				# Now, process the parenthetical
 				p = result.group(5).strip()
-				result = re.search(r'^(\d+(?:d\d+)?(?:[+−—–-]\d+)?)?\s*(?:/(\d+\s*[−—–-]\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?$', p)
+				result = re.search(r'^(\d+(?:d\d+)?(?:[+-]\d+)?)?\s*(?:/(\d+\s*-\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?$', p)
 				if result is None:
 					attack_dict["effects"] = p
 				else:
@@ -404,7 +405,7 @@ def parsePage(html):
 					else:
 						attack_dict["damage"] = result.group(1)
 						if not result.group(2) is None:
-							attack_dict["crit_range"] = re.sub(r'[−—–-]', "-", result.group(2))
+							attack_dict["crit_range"] = result.group(2)
 						if not result.group(3) is None:
 							attack_dict["crit_multiplier"] = parseInt(result.group(3))
 						if not result.group(4) is None or not result.group(6) is None:
@@ -435,7 +436,7 @@ def parsePage(html):
 				attack_dict = {"text": entry}
 
 				# First, process the body and separate the parenthetical
-				result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+−—–-]\d+/)*[+−—–-]\d+)?(?:\s+(?:ranged\s+)?(touch))?\s*(?:\(([^)]+)\))?$', entry)
+				result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+(?:ranged\s+)?(touch))?\s*(?:\(([^)]+)\))?$', entry)
 				assert not result is None, "Ranged Attack Regex 1 failed for " + url
 				if not result.group(1) is None:
 					attack_dict["count"] = parseInt(result.group(1))
@@ -448,7 +449,7 @@ def parsePage(html):
 				# Now, process the parenthetical
 				if not result.group(5) is None:
 					p = result.group(5).strip()
-					result = re.search(r'^(\d+(?:d\d+)?(?:[+−—–-]\d+)?)?\s*(?:/(\d+\s*[−—–-]\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?$', p)
+					result = re.search(r'^(\d+(?:d\d+)?(?:[+-]\d+)?)?\s*(?:/(\d+\s*-\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?$', p)
 					if result is None:
 						attack_dict["effects"] = p
 					else:
@@ -457,7 +458,7 @@ def parsePage(html):
 						else:
 							attack_dict["damage"] = result.group(1)
 							if not result.group(2) is None:
-								attack_dict["crit_range"] = re.sub(r'[−—–-]', "-", result.group(2))
+								attack_dict["crit_range"] = result.group(2)
 							if not result.group(3) is None:
 								attack_dict["crit_multiplier"] = parseInt(result.group(3))
 							if not result.group(4) is None or not result.group(6) is None:
@@ -476,7 +477,7 @@ def parsePage(html):
 	if e[i].name == "b" and e[i].get_text() == "Space":
 		i += 1
 		assert isinstance(e[i], NavigableString), url
-		result = re.search(r'^(?:(\d+)|(2\s*[−—–-]?\s*1/2)|(1/2))\s*(?:ft\.?|feet)$', cleanS(e[i], ",").strip())
+		result = re.search(r'^(?:(\d+)|(2\s*-?\s*1/2)|(1/2))\s*(?:ft\.?|feet)$', cleanS(e[i], ",").strip())
 		assert not result is None, "Space Regex failed for " + url
 		if not result.group(2) is None:
 			pageObject["space"] = 2.5
@@ -491,7 +492,7 @@ def parsePage(html):
 		i += 1
 		assert isinstance(e[i], NavigableString), url
 		
-		result = re.search(r'^(?:(\d+)|(2\s*[−—–-]?\s*1/2)|(1/2))\s*(?:ft\.?|feet)(?:\s*\(?([^)]+)\)?)?$', cleanS(e[i], ",").strip())
+		result = re.search(r'^(?:(\d+)|(2\s*-?\s*1/2)|(1/2))\s*(?:ft\.?|feet)(?:\s*\(?([^)]+)\)?)?$', cleanS(e[i], ",").strip())
 		assert not result is None, "Reach Regex failed for " + url
 		if not result.group(2) is None:
 			pageObject["reach"] = 2.5
@@ -515,7 +516,7 @@ def parsePage(html):
 	# Helper function to handle headers of spell and spell-like ability blocks
 	def handleSpellRelatedHeader(text, out):
 		assert isinstance(text, NavigableString), url
-		result = re.search(r'^\((?:CL|caster level) (\d+)(?:\w{2})?(?:[;,] +conc(?:entration|\.):? ([+−—–-][\d,]+))?(?:[;,] +(?:(?:(\d+%) (?:arcane )?spell failure(?: chance)?)|(?:arcane )?spell failure(?: chance)? (\d+%)))?(?:[;,] +(?:save DCs are )?(\w+)[−—–-]based)?\)$', text.strip(), re.IGNORECASE) # Handles corrupted formatting for , instead of ; like in Ice Mage. Concentration colon for Executioner Devil (Munagola)
+		result = re.search(r'^\((?:CL|caster level) (\d+)(?:\w{2})?(?:[;,] +conc(?:entration|\.):? ([+-][\d,]+))?(?:[;,] +(?:(?:(\d+%) (?:arcane )?spell failure(?: chance)?)|(?:arcane )?spell failure(?: chance)? (\d+%)))?(?:[;,] +(?:save DCs are )?(\w+)-based)?\)$', text.strip(), re.IGNORECASE) # Handles corrupted formatting for , instead of ; like in Ice Mage. Concentration colon for Executioner Devil (Munagola)
 		assert not result is None, "Spell-Related Header Regex failed for " + url
 		out["CL"] = parseInt(result.group(1))
 		if result.group(2) is not None:
@@ -544,7 +545,7 @@ def parsePage(html):
 
 		pageObject["spell_like_abilities"][t]["freq"] = {}
 		while isinstance(e[i], NavigableString):
-			result = re.search(r'^(.+?)\s*[−—–-]\s*(.+)$', collectText(["h3", "br"]).strip())
+			result = re.search(r'^(.+?)\s*-\s*(.+)$', collectText(["h3", "br"]).strip())
 			if not result is None:
 				pageObject["spell_like_abilities"][t]["freq"][result.group(1)] = splitP(result.group(2))
 				skipBr(optional=True)
@@ -576,7 +577,7 @@ def parsePage(html):
 		skipBr()
 
 		while isinstance(e[i], NavigableString):
-			result = re.search(r'^(.+?)\s*[−—–-]\s*(.+)$', collectText(["h3", "br"]).strip())
+			result = re.search(r'^(.+?)\s*-\s*(.+)$', collectText(["h3", "br"]).strip())
 			assert not result is None, "Spell-Like Ability Line Regex failed for " + url
 			pageObject["kineticist_wild_talents"][result.group(1)] = splitP(result.group(2))
 			skipBr(optional=True)
@@ -589,7 +590,7 @@ def parsePage(html):
 		i += 1
 		skipBr()
 
-		result = re.search(r'^(.+?)\s*[−—–-]\s*(.+)$', collectText(["h3", "br"]).strip())
+		result = re.search(r'^(.+?)\s*-\s*(.+)$', collectText(["h3", "br"]).strip())
 		assert not result is None, "Psychic Magic Line Regex failed for " + url
 		
 		pageObject["psychic_magic"]["PE"] = result.group(1)
@@ -645,7 +646,7 @@ def parsePage(html):
 		pageObject["spells"][t]["level"] = {}
 		while isinstance(e[i], NavigableString):
 			s = collectText(["h3", "br"]).strip()
-			result = re.search(r'^(.+?)\s*([−—–-])(?![^()]*\))', s) # Make sure not to get a dash inside parens e.g. Young Occult Dragon
+			result = re.search(r'^(.+?)\s*(-)(?![^()]*\))', s) # Make sure not to get a dash inside parens e.g. Young Occult Dragon
 			if not result is None:
 				pageObject["spells"][t]["level"][result.group(1)] = splitP(s[result.end(2):].strip())
 				skipBr(optional=True)
@@ -743,7 +744,7 @@ def parsePage(html):
 		t = e[i].get_text().upper()
 		i += 1
 		v = cleanS(e[i], trailingChar=",")
-		if v in "−—–-":
+		if v == "-":
 			v = None
 		else:
 			v = parseInt(v, stringIfFail=True)
@@ -759,9 +760,12 @@ def parsePage(html):
 	pageObject["BAB"] = parseInt(cleanS(collectText(["b"])), stringIfFail=True)
 	assert e[i].name == "b" and e[i].get_text() == "CMB", url
 	i += 1
-	result = re.search(r'^([−—–-]|[+−—–-]?\d+)(?:\s*\(([^)]+)\))?$', cleanS(collectText(["b"])).strip())
+	x = cleanS(collectText(["b"])).strip()
+	result = re.search(r'^(-|[+-]?\d+)(?:\s*\(([^)]+)\))?$', x)
+	if result is None:
+		print("|" + x + "|")
 	assert not result is None, "CMB Regex failed for " + url
-	if result.group(1) in "−—–-":
+	if result.group(1) == "-":
 		pageObject["CMB"] = None
 	else:
 		pageObject["CMB"] = parseInt(result.group(1))
@@ -769,9 +773,9 @@ def parsePage(html):
 		pageObject["CMB_other"] = result.group(2).strip()
 	assert e[i].name == "b" and e[i].get_text() == "CMD", url
 	i += 1
-	result = re.search(r'^([−—–-]|[+−—–-]?\d+)(?:\s*\(([^)]+)\))?$', cleanS(collectText(["br", "h1", "h2", "h3"])).strip())
+	result = re.search(r'^(-|[+-]?\d+)(?:\s*\(([^)]+)\))?$', cleanS(collectText(["br", "h1", "h2", "h3"])).strip())
 	assert not result is None, "CMD Regex failed for " + url
-	if result.group(1) in "−—–-":
+	if result.group(1) == "-":
 		pageObject["CMD"] = None
 	else:
 		pageObject["CMD"] = parseInt(result.group(1))
@@ -809,7 +813,7 @@ def parsePage(html):
 
 		# Handle the skills segment
 		while s is not None and s.strip() != "": # Complex ingestion process to deal with commas inside parentheses (e.g. "Knowledge (arcana, religion)")
-			result = re.search(r"^(.+?)(?: \((.+?)\))? ([+−—–-]\d+)(?: *\(([^,]+)\))?(?:, (.+)?)?$", s.strip())
+			result = re.search(r"^(.+?)(?: \((.+?)\))? ([+-]\d+)(?: *\(([^,]+)\))?(?:, (.+)?)?$", s.strip())
 			assert not result is None, "Skills Regex failed for " + url
 			
 			if result.group(2) is None:
@@ -828,9 +832,9 @@ def parsePage(html):
 			s = s_racial
 
 			# Same logic as above, but need to handle 2 different formats ("+4 Perception" vs. "Perception +4")
-			if s[0] in "+−—–-":
+			if s[0] in "+-":
 				while s is not None and s.strip() != "":
-					result = re.search(r"^([+−—–-]\d+) ([^,]+)(?: \((.+?)\))?(?:, (.+)?)?", s.strip())
+					result = re.search(r"^([+-]\d+) ([^,]+)(?: \((.+?)\))?(?:, (.+)?)?", s.strip())
 					if not result is None:
 						if result.group(3) is None:
 							pageObject["skill_racial_mods"][result.group(2)] = parseInt(result.group(1))
@@ -842,7 +846,7 @@ def parsePage(html):
 						break
 			else:
 				while s is not None and s.strip() != "": # Complex ingestion process to deal with commas inside parentheses (e.g. "Knowledge (arcana, religion)")
-					result = re.search(r"^(.+?)(?: \((.+?)\))? ([+−—–-]\d+)(?:, (.+)?)?", s.strip())
+					result = re.search(r"^(.+?)(?: \((.+?)\))? ([+-]\d+)(?:, (.+)?)?", s.strip())
 					if not result is None:
 						if result.group(2) is None:
 							pageObject["skill_racial_mods"][result.group(1)] = parseInt(result.group(3))
