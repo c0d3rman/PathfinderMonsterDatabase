@@ -4,6 +4,7 @@ from functools import reduce
 import operator
 import copy
 from tqdm import tqdm
+import itertools
 
 
 if __name__ == "__main__":
@@ -42,42 +43,58 @@ if __name__ == "__main__":
 
 	print("Getting all unique leaves...")
 	unique_leaves = {}
+	unique_leaves_lookup = {}
+	unique_leaves_counts = {}
 	for keylist in tqdm(leaf_keys):
 		# Skip sources because dicts in lists is a headache
 		if keylist[0] == "sources":
 			continue
 
 		subd = unique_leaves
-		for key in keylist[:-1]:
-			if not key in subd:
-				subd[key] = {}
-			subd = subd[key]
-		subd[keylist[-1]] = set()
+		for subd in [unique_leaves, unique_leaves_lookup, unique_leaves_counts]:
+			for key in keylist[:-1]:
+				if not key in subd:
+					subd[key] = {}
+				subd = subd[key]
+			
+		get_from_dict(unique_leaves, keylist[:-1])[keylist[-1]] = set()
+		get_from_dict(unique_leaves_lookup, keylist[:-1])[keylist[-1]] = {}
+		get_from_dict(unique_leaves_counts, keylist[:-1])[keylist[-1]] = {}
 		
-		for d2 in d.values():
-			if get_from_dict(d2, keylist) is not False:
-				val = get_from_dict(d2, keylist)
-				if type(val) is not list:
-					val = [val]
-				get_from_dict(unique_leaves, keylist).update(set(val))
+		for k, v in d.items():
+			val = get_from_dict(v, keylist)
+			if val is not False:
+				if type(val) is list and any(isinstance(x, list) or isinstance(x, set) for x in val): # Flatten lists of lists (e.g. attacks_melee)
+					val = set(itertools.chain.from_iterable(val))
+				elif type(val) is not set and type(val) is not list:
+					val = set([val])
 
-	print("Constructing reverse lookup map and count map...")
-	unique_leaf_value_lookup = copy.deepcopy(unique_leaves)
-	unique_leaf_value_counts = copy.deepcopy(unique_leaves)
-	for keylist in tqdm(leaf_keys):
-		leafset = get_from_dict(unique_leaves, keylist)
-		if leafset is False: # For sources
-			continue
-		subd = {}
-		subd2 = {}
-		get_from_dict(unique_leaf_value_lookup, keylist[:-1])[keylist[-1]] = subd
-		get_from_dict(unique_leaf_value_counts, keylist[:-1])[keylist[-1]] = subd2
+				get_from_dict(unique_leaves, keylist).update(val)
 
-		for val in leafset:
-			subd[val] = []
-			subd2[val] = 0
-			for k, v in d.items():
-				candidate = get_from_dict(v, keylist)
-				if ((type(candidate) is list or type(candidate) is set) and val in candidate) or candidate == val:
-					subd[val].append(k)
-					subd2[val] += 1
+				for subval in val:
+					d_lookup = get_from_dict(unique_leaves_lookup, keylist)
+					if not subval in d_lookup:
+						d_lookup[subval] = []
+					d_lookup[subval].append(k)
+
+					d_counts = get_from_dict(unique_leaves_counts, keylist)
+					if not subval in d_counts:
+						d_counts[subval] = 0
+					d_counts[subval] += 1
+
+# For nice printing
+def p(d):
+	print(json.dumps(d, indent=2))
+
+# For searching a nested dict for stuff
+def search(d, s, caseSensitive=True):
+	if type(d) is dict:
+		return any(search(d2, s) for d2 in d.values()) or any(search(d2, s) for d2 in d.keys())
+	elif type(d) is list or type(d) is set:
+		return any(search(d2, s) for d2 in d)
+	elif type(d) is str:
+		if not caseSensitive:
+			d = d.lower()
+		return s in d
+	else:
+		return d == s

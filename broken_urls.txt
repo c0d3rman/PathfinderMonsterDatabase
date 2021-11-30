@@ -138,22 +138,55 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Kaltestrua,%20Governess%20of%20C
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Putrid%20Ooze
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Divine%20Chieftain
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Voice%20of%20the%20Damned
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Neothelid%20Overlord
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Oronci
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Thath-Malal,%20the%20Eyeless%20Prince
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Clockwork%20Fiend
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Blood%20Lily
+
+
+# Missing slam attack bonus (in original source material)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Flaming%20Skull
+# Trailing comma (in original source material)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Formless%20Spawn
+# No attack damage (because attack is damageless)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghristah
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Furcifer
+# Special value - no melee attack
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Lar
+
+# Melee attack errors (reported)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Draugr
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Decapus
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Crone%20Queen
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Paracletus
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Cambion
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Urdefhan
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Seraptis
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Purrodaemon
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Pazuzu
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Moloch
 
 
 
 TBD
 Asterisk:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Orania,%20Cloud%20Giant%20Oligarch
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tawil%20At%27umr
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Vildeis
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Yig
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Rhan-Tegoth
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Cernunnos
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Mother%27s%20Maw
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Oozlosh,%20Marsh%20Giant%20High%20Priest
-Extra info in ability scores:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ephemeral%20Echo
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Melacage
+Mythic monsters yet-to-be-added that have an M line (many of which won't work with current handling):
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Lich
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Arazni
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Apkallu
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Old-Mage%20Jatembe
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Kortash%20Khain
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Wyrm%20Red%20Dragon
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Solar%20Pitri%20(Agnishvatta)
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Shen
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Rakshasa
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Portunus
 Commas inside parens in skills complicating things
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Shadow
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Greater%20Shadow
@@ -168,9 +201,6 @@ Unique line after alignment line:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ugash-Iram
 Touch modifier in spell-related header:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Vampire
-Parenthetical in resistances:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Arcanotheign
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Genie-Touched%20Horse
 Skills issue:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Sunflower%20Leshy
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Poison%20Frog
