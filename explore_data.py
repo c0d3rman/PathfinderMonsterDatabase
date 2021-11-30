@@ -81,18 +81,15 @@ if __name__ == "__main__":
 	# 			o = process_unique_leaves_recursively(v, unique_leaves, unique_leaves_lookup, unique_leaves_counts)
 	# 			if type(o) is set: # It's a leaf
 
-	def join_nested_dicts_of_sets(d1, d2): # Inserts d2 into d1
-		if type(d1) is set:
-			assert type(d2) is set
-			d1.update(d2)
-			return
+	def join_nested_dicts_of_sets(l): # l is a nonempty list of nested dicts, where all leaves are sets
+		if type(l[0]) is set:
+			return set().union(*[x for x in l])
 
-		for k, v in d2.items():
-			if not k in d1:
-				d1[k] = v
-			else:
-				join_nested_dicts_of_sets(d1[k], v)
-
+		d1 = {}
+		for k in set().union(*[set(d2.keys()) for d2 in l]):
+			d1[k] = join_nested_dicts_of_sets([d2[k] for d2 in l if k in d2])
+		return d1
+	
 	# d1 = {
 	# 	"a": {
 	# 		"X": {
@@ -101,7 +98,8 @@ if __name__ == "__main__":
 	# 		},
 	# 		"Y": set([99])
 	# 	},
-	# 	"b": set([10, 5])
+	# 	"b": set([10, 5]),
+	# 	"d": {}
 	# }
 	# d2 = {
 	# 	"a": {
@@ -115,20 +113,21 @@ if __name__ == "__main__":
 	# 		}
 	# 	},
 	# 	"b": set([11, 55]),
-	# 	"c": set([88])
+	# 	"c": set([88]),
+	# 	"d": {}
 	# }
+	# print(join_nested_dicts_of_sets([d1, d2]))
 
-	def semi_flatten_nested_data(d):
+	def semi_flatten_nested_data(d, url=None):
+		if url is None: # We're at the top
+			return join_nested_dicts_of_sets([semi_flatten_nested_data(v, url=k) for k, v in d.items()])
+
 		if type(d) is dict:
-			return {k: semi_flatten_nested_data(v) for k, v in d.items()}
+			return {k: semi_flatten_nested_data(v, url=url) for k, v in d.items()}
 		elif type(d) is list or type(d) is set:
-			r = [semi_flatten_nested_data(x) for x in d]
-			r0 = r[0]
-			for ri in r[1:]:
-				join_nested_dicts_of_sets(r0, ri)
-			return r0
+			return join_nested_dicts_of_sets([semi_flatten_nested_data(x, url=url) for x in d])
 		else:
-			return set([d])
+			return {d: set([url])}
 
 	# testd = [
 	# 	{
@@ -155,4 +154,4 @@ if __name__ == "__main__":
 	# 	}
 	# ]
 
-	unique_leaves = semi_flatten_nested_data(list(d.values()))
+	unique_leaves_lookup = semi_flatten_nested_data(d)
