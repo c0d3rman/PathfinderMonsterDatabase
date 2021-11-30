@@ -124,7 +124,9 @@ def parsePage(html):
 	result = re.search(r'^(.+) CR ([0-9/−—–-]+)$', e[i].get_text())
 	assert not result is None, "CR-finding Regex failed for " + url
 	pageObject["title2"] = result.group(1)
-	pageObject["CR"] = result.group(2)
+	pageObject["CR"] = parseInt(result.group(2), stringIfFail=True)
+	if type(pageObject["CR"]) is str and len(pageObject["CR"]) == 1 and pageObject["CR"] in "−—–-":
+		pageObject["CR"] = None
 	i += 1
 
 	# Get source

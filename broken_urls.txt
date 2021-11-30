@@ -155,7 +155,8 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Furcifer
 # Special value - no melee attack
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Lar
 
-# Melee attack errors (reported)
+# ==== REPORTED ISSUES ====
+# Melee attack errors
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Draugr
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Decapus
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Crone%20Queen
@@ -166,10 +167,12 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Seraptis
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Purrodaemon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Pazuzu
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Moloch
+# extraneous period at the end of the psychic magic section
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Lotus%20Tree
 
 
 
-TBD
+# ==== TBD =====
 Asterisk:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Orania,%20Cloud%20Giant%20Oligarch
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Vildeis
