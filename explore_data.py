@@ -4,7 +4,12 @@ import json
 
 # For nice printing
 def p(d):
-	print(json.dumps(d, indent=2))
+	def set_default(obj):
+		if isinstance(obj, set):
+			return list(obj)
+		raise TypeError
+
+	print(json.dumps(d, indent=2, default=set_default))
 
 # For searching a nested dict for stuff
 def search(d, s, caseSensitive=True):
@@ -28,9 +33,9 @@ if __name__ == "__main__":
 	print(" done")
 
 	# Filter 3.5 entries
-	print("Filtering 3.5 entries...", end="", flush=True)
-	d = {k: v for k, v in d.items() if "is_3.5" not in v}
-	print(" done")
+	# print("Filtering 3.5 entries...", end="", flush=True)
+	# d = {k: v for k, v in d.items() if "is_3.5" not in v}
+	# print(" done")
 	
 	def join_nested_dicts_of_sets(l): # l is a nonempty list of nested dicts, where all leaves are sets
 		if type(l[0]) is set:
@@ -66,7 +71,7 @@ if __name__ == "__main__":
 				generate_main_and_counts(v, unique_leaves[k], unique_leaves_counts[k])
 			else:
 				unique_leaves[k] = set(v.keys())
-				unique_leaves_counts[k] = {k2: len(v2) for k2, v2 in v.items()}
+				unique_leaves_counts[k] = {k2: len(v2) for k2, v2 in sorted(v.items(), key=lambda item: len(item[1]))} # Sort the counts dict for easier use
 	unique_leaves = {}
 	unique_leaves_counts = {}
 	generate_main_and_counts(unique_leaves_lookup, unique_leaves, unique_leaves_counts)

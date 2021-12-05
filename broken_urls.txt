@@ -1,4 +1,3 @@
-https://aonprd.com/NPCDisplay.aspx?ItemName=Daredevil%20Hunter
 https://aonprd.com/NPCDisplay.aspx?ItemName=Death%20Dealer
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Braismois
 https://aonprd.com/NPCDisplay.aspx?ItemName=Expert%20Blacksmith
@@ -17,7 +16,6 @@ https://aonprd.com/NPCDisplay.aspx?ItemName=Demon-Blooded%20Sorcerer
 https://aonprd.com/NPCDisplay.aspx?ItemName=Lucky%20Mage
 https://aonprd.com/NPCDisplay.aspx?ItemName=Queen%20of%20Staves
 https://aonprd.com/NPCDisplay.aspx?ItemName=Azure%20Bolt%20Sorcerer
-https://aonprd.com/NPCDisplay.aspx?ItemName=Scholar%20Priest
 https://aonprd.com/NPCDisplay.aspx?ItemName=Technic%20League%20Captain
 https://aonprd.com/NPCDisplay.aspx?ItemName=Shadow%20Cleric
 https://aonprd.com/NPCDisplay.aspx?ItemName=Beggar
@@ -28,7 +26,6 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Shenzuzhou
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Failed%20Prophet
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Relictner
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ratfolk%20Troubleshooter
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Movanic%20Deva
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Duergar%20Tyrant
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Khardajeen
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Gravesludge
@@ -50,30 +47,21 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Basavan
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Chuul,%20Lesser
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Deep%20Walker
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Fyndylsnitch%20the%20Shadowking
-https://aonprd.com/MonsterDisplay.aspx?ItemName=The%20Mourning%20One
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Soulpierced
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Water%20Orm
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Tidepool%20Dragon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Empyrean
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Barzahk
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Asurendra
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Gloomwing
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Tooth%20Fairy%20Monarch
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Owb%20Prophet
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Behir
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Juggernaut%20Beetle
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Mimic
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Champion%20Automaton
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Pard
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Deinochos
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Corbayrant
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Tyrannosaurus
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Warmonger%20Devil%20(Levaloch)
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Warden%20Jack%20Swarm
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Bottled%20Armada
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Triceratops
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Old%20Wulunga
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Incubus
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Unknown
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Shadow%20Collector
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Egregore
@@ -81,7 +69,6 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Paguroida
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Bibliodaemon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Emotion%20Ooze
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Glacier%20Toad
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Platypus
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Maharishi%20Manu
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Alp
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Cervine%20Protector
@@ -90,44 +77,29 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Dread%20Lord
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Prismatic%20Orrery
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Venomroach
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Mummy%20Lord
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Floodslain%20Arsinoitherium
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Tataka
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Elder%20Wyrm
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Tobongo%20(Mwangi%20Treant)
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Lantern%20Archon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Gold%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Hyena
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ogre
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Thriae%20Dancer
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Psychoplasmic%20Behir
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Edict%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Enlightened%20Construct%20Clockwork%20Soldier
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Goblin%20Commando
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Cipactli
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Augnagar
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Forsaken%20Lich
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Mangvhune,%20the%20Temple%20Hill%20Slasher
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Earth%20Yai
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Foo%20Lion
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Shabti
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Festering%20Ulunat%20(The%20Unholy%20First)
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Hykariut
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Japalisura
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Fleshdreg%20Swarm
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Great%20Diadem%20Urchin
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Nightmare%20Dragon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Swamp%20Mummy
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ancient%20Occult%20Dragon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Atomie
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ogrekin
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Edict%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Haunted%20Construct%20Scarecrow
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Seeded%20Lamia
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Implacable%20Stalker
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Andrazku
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Mohrg
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Rabisu
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Egophage
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Fulgati
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Preceptor%20Archon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Cultist%20Troop
@@ -136,24 +108,20 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Enisysian
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Grootslang
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Kaltestrua,%20Governess%20of%20Casnoriva
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Putrid%20Ooze
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Divine%20Chieftain
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Voice%20of%20the%20Damned
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Neothelid%20Overlord
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Oronci
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Thath-Malal,%20the%20Eyeless%20Prince
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Clockwork%20Fiend
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Blood%20Lily
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Enlightened%20Construct%20Clockwork%20Soldier
 
-
-# Missing slam attack bonus (in original source material)
+# ==== SOURCE MATERIAL ISSUES ====
+# Missing slam attack bonus
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Flaming%20Skull
-# Trailing comma (in original source material)
+# Trailing comma
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Formless%20Spawn
-# No attack damage (because attack is damageless)
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghristah
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Furcifer
-# Special value - no melee attack
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Lar
+
 
 # ==== REPORTED ISSUES ====
 # Melee attack errors
@@ -167,9 +135,31 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Seraptis
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Purrodaemon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Pazuzu
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Moloch
+https://aonprd.com/NPCDisplay.aspx?ItemName=Courtesan
+https://aonprd.com/NPCDisplay.aspx?ItemName=Tribe%20(Chieftain)
 # extraneous period at the end of the psychic magic section
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Lotus%20Tree
-
+# Aura appears twice
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Hoary%20Muntjac
+# Reach typo
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Xenarth
+# AC has erroneous pluses
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Dahzagan
+# AC missing comma
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Jungle%20Drake
+# Broken HTML
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Rift%20Dragon
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Green%20Man
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Ashen%20Forgemaster
+# Special attacks accidentally listed under Space
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Energized%20Ice%20Golem
+# Saving throw issues
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Keulia
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Frost%20Giant%20Jarl
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Frost%20Giant%20Battle%20Priest
+https://aonprd.com/NPCDisplay.aspx?ItemName=Hellknight
+https://aonprd.com/NPCDisplay.aspx?ItemName=Noble%20(Knight)
+https://aonprd.com/NPCDisplay.aspx?ItemName=Acid%20Terror
 
 
 # ==== TBD =====
@@ -190,9 +180,6 @@ https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Solar%20Pitri%20(Agnishvat
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Shen
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Rakshasa
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Portunus
-Commas inside parens in skills complicating things
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Shadow
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Greater%20Shadow
 Racial Modifier things:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Salamander
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Cloaker
@@ -202,8 +189,6 @@ Two AC lines smh:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Unfettered%20Phantom
 Unique line after alignment line:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ugash-Iram
-Touch modifier in spell-related header:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Vampire
 Skills issue:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Sunflower%20Leshy
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Poison%20Frog
@@ -215,14 +200,10 @@ Occultist implements:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Reborn%20Samsaran
 Two initiatives, what the fuck:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Irii
-Haven't bothered to check:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Spectre
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Onwu%20Azu
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Dahzagan
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Hive%20Larva%20Swarm
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Green%20Man
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Rift%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tuatara
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Energized%20Ice%20Golem
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Jungle%20Drake
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ashen%20Forgemaster
+# No attack damage (because attack is damageless)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghristah
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Croaker
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Furcifer
+# Melee attack special syntax
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Arcanaton
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Canopy%20Creeper
