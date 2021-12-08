@@ -10,18 +10,14 @@ keepSuperscripts = False
 
 include3_5 = True
 
-# TODO - handle asterisks * better
-# TODO - investigate URLs that appear multiple times in monster list
+# TODO - handle asterisks * better. Recheck existing asterisk handling to make sure it isn't skipping non-asterisk lines by accident
 # TODO - investigate pages with multiple statblocks (e.g. mammoth rider NPC)
 # TODO - the current handling of \r and other weird newlines introduces a lot of spaces in the wrong places. Need better solution. See Lastwall Border Scout
-# TODO - make sure the dash in At-will doesn't break things in spells, spell like abilities, etc.
-# TODO - fix racial modifiers all around, including giving it similar _other structure to skills (try on Demonic Deadfall Scorpion)
 # TODO - go over the TBD broken urls
-# TODO - add mythic monsters, which requires modifying the CR regex to parse MR and also getting the actual URLs from https://aonprd.com/MythicMonsters.aspx?Letter=All
-# TODO - add "other" field for saves (e.g. parse "Will +4; +2 vs. illusions, +2 vs. fear" or '+10; +4 vs. bardic performance, language-dependent, and sonic')
-# TODO - parse 3.5 advancement field
+# TODO - handle M line in mythic monsters
 # TODO - add better handling for mismatch detection in Perception when there's a parenthetical instead of just giving up (e.g. Platypus)
-# TODO - upgrade download_pages with a script to make the url list
+# TODO - swap to manual list of skills for skill and racial mod handling (so I can do better parsing of e.g. "Survival (in snow)" vs "Craft (traps)")
+# TODO - add DC parsing to spell-like abilities like we have for spells (e.g. Mythic Nalfeshnee)
 """
 TODO - handle some special cases:
 Strange melee attacks
@@ -48,6 +44,9 @@ import sys
 import traceback
 from tqdm import tqdm
 
+
+
+sizes = ['Fine', 'Diminutive', 'Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan', 'Colossal']
 
 def parseInt(s, stringIfFail=False):
 	def _parseInt(s):
@@ -79,6 +78,10 @@ def parsePage(html):
 	e = soup.select_one("div#main table tr td span").contents
 	i = 0
 	e.append(soup.new_tag("custom_end")) # Append a special end tag so we don't fall off the end
+
+	# Skip preamble sections, like in Mythic Nalfeshnee
+	while not (e[i].name == "h1" and ((e[i+1].name == "i" and e[i+2].name == "h2") or e[i+1].name == "h2")):
+		i += 1
 
 	# Helper function to skip br tags
 	def skipBr(optional=False):
@@ -142,12 +145,14 @@ def parsePage(html):
 
 	# Get statblock title & CR
 	assert e[i].name == "h2" and e[i]['class'] == ['title'], url
-	result = re.search(r'^(.+) CR ([0-9/-]+)$', e[i].get_text())
+	result = re.search(r'^(.+) CR ([0-9/-]+?)(?:/MR (\d+))?$', e[i].get_text())
 	assert not result is None, "CR-finding Regex failed for " + url
 	pageObject["title2"] = result.group(1)
 	pageObject["CR"] = parseInt(result.group(2), stringIfFail=True)
 	if pageObject["CR"] == "-":
 		pageObject["CR"] = None
+	if not result.group(3) is None:
+		pageObject["MR"] = parseInt(result.group(3))
 	i += 1
 
 	# Get source
@@ -187,7 +192,6 @@ def parsePage(html):
 		skipBr()
 
 	# Get alignment, size, type, subtypes
-	sizes = ['Fine', 'Diminutive', 'Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan', 'Colossal']
 	result = re.search(r'^(.+) (' + "|".join(sizes) + r') ([^(]+)(?: \((.+)\))?$', s.strip())
 	assert not result is None, "Alignment Line Regex failed for " + url
 	pageObject["alignment"] = result.group(1)
@@ -200,10 +204,17 @@ def parsePage(html):
 	assert e[i].name == "b" and e[i].get_text() == "Init", url
 	i += 1
 	assert isinstance(e[i], NavigableString), url
-	result = re.search(r'^ ([+-]\s*\d+(?:\s+\(.+?\))?)\s*; ', e[i])
-	assert not result is None, "Initiative Regex failed for " + url
-	pageObject["initiative"] = parseInt(result.group(1), stringIfFail=True)
-	i += 1
+	s = collectText("b").strip()
+	result = re.search(r'^([+-]\s*\d+)(?:/([+-]\s*\d+))?\s*(?:\(([+-]\s*\d+)\s+(.+?)\))?\s*(?:[,;]\s*(.+?)\s*)?;$', s)
+	assert not result is None, "Initiative Regex failed for " + url + " |" + s + "|"
+	if not result.group(2) is None: # Check for dual initiative
+		pageObject["initiative"] = {"bonus": [parseInt(result.group(1)), parseInt(result.group(2))]}
+	else:
+		pageObject["initiative"] = {"bonus": parseInt(result.group(1))}
+	if not result.group(3) is None: # Different initiative modifier in some instances (e.g. Formian Taskmaster, "(+6 with hive mind)")
+		pageObject["initiative"]["other"] = {result.group(4): parseInt(result.group(3))}
+	if not result.group(5) is None: # Initiative abilities
+		pageObject["initiative"]["ability"] = result.group(5)
 
 	# Get senses
 	assert e[i].name == "b" and e[i].get_text() == "Senses", url
@@ -369,10 +380,12 @@ def parsePage(html):
 		for entry in splitP(s, sep=r'(?:,?\s+and\s+|,)'):
 			entry = entry.strip() # Handles strange whitespace in cases like Black Magga (probably caused by \r handling)
 			result = re.search(r'^(.+?)\s+(\d+)(?:\s*\((.+?)\))?$', entry)
-			assert not result is None, "Resistance Regex failed for " + url
-			pageObject["resistances"][result.group(1).lower()] = parseInt(result.group(2))
-			if not result.group(3) is None:
-				pageObject["resistances"][result.group(1).lower() + "_other"] = result.group(3).strip()
+			if result is None: # Custom resistances, e.g. The Whispering Tyrant
+				pageObject["resistances"][entry] = True
+			else:
+				pageObject["resistances"][result.group(1).lower()] = parseInt(result.group(2))
+				if not result.group(3) is None:
+					pageObject["resistances"][result.group(1).lower() + "_other"] = result.group(3).strip()
 
 	# Get SR if present
 	if e[i].name == "b" and e[i].get_text() == "SR":
@@ -435,10 +448,7 @@ def parsePage(html):
 		i += 1
 		s = collectText(["h3", "b"]).strip()
 
-		# Special case - no melee attack (currently only present in Lar)
-		if s == "---":
-			pageObject["attacks_melee"] = None
-		else:
+		if s != "---": # Special case - no melee attack (currently only present in Lar)
 			pageObject["attacks_melee"] = []
 			groups = splitP(s, sep=r'(?<=\))[;,]?\s+or\s+')
 			for group in groups:
@@ -449,7 +459,7 @@ def parsePage(html):
 					attack_dict = {"text": entry}
 
 					# First, process the body and separate the parenthetical
-					result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+melee)?(\s+touch)?\s*\(([^)]+)\)$', entry)
+					result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+melee)?(\s+touch)?\s*(?:\(([^)]+)\))?$', entry)
 					assert not result is None, "Melee Attack Regex 1 failed for " + url
 					if not result.group(1) is None:
 						attack_dict["count"] = parseInt(result.group(1))
@@ -460,29 +470,28 @@ def parsePage(html):
 						attack_dict["touch"] = True
 
 					# Now, process the parenthetical
-					p = result.group(5).strip()
-					result = re.search(r'^(\d+(?:d\d+)?(?:[+-]\d+)?)?\s*(?:/(\d+\s*-\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?$', p)
-					if result is None:
-						attack_dict["effects"] = p
-					else:
-						if result.group(1) is None:
-							assert result.group(2) is None and result.group(3) is None and result.group(4) is None and result.group(6) is None, url
+					if not result.group(5) is None:
+						p = result.group(5).strip()
+						result = re.search(r'^(\d+(?:d\d+)?(?:[+-]\d+)?)?\s*(?:/(\d+\s*-\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?$', p)
+						if result is None:
+							attack_dict["effects"] = p
 						else:
-							attack_dict["damage"] = result.group(1)
-							if not result.group(2) is None:
-								attack_dict["crit_range"] = result.group(2)
-							if not result.group(3) is None:
-								attack_dict["crit_multiplier"] = parseInt(result.group(3))
-							if not result.group(4) is None or not result.group(6) is None:
-								assert result.group(4) is None or result.group(6) is None, urls # Can't have both at the same time, so make sure one is None
-								if result.group(4) is None:
-									attack_dict["damage_type"] = result.group(6)
-								else:
-									attack_dict["damage_type"] = result.group(4)
-							if not result.group(5) is None:
-								attack_dict["effects"] = result.group(5)
-							
-
+							if result.group(1) is None:
+								assert result.group(2) is None and result.group(3) is None and result.group(4) is None and result.group(6) is None, url
+							else:
+								attack_dict["damage"] = result.group(1)
+								if not result.group(2) is None:
+									attack_dict["crit_range"] = result.group(2)
+								if not result.group(3) is None:
+									attack_dict["crit_multiplier"] = parseInt(result.group(3))
+								if not result.group(4) is None or not result.group(6) is None:
+									assert result.group(4) is None or result.group(6) is None, urls # Can't have both at the same time, so make sure one is None
+									if result.group(4) is None:
+										attack_dict["damage_type"] = result.group(6)
+									else:
+										attack_dict["damage_type"] = result.group(4)
+								if not result.group(5) is None:
+									attack_dict["effects"] = result.group(5)
 
 					group_list.append(attack_dict)
 					
@@ -575,7 +584,7 @@ def parsePage(html):
 	# Get special attacks if present
 	if e[i].name == "b" and e[i].get_text() == "Special Attacks":
 		i += 1
-		pageObject["attacks_special"] = splitP(collectText(["h3", "br"]).strip())
+		pageObject["attacks_special"] = [x.strip() for x in splitP(collectText(["h3", "br"]).strip())]
 		skipBr(optional=True)
 
 	# Helper function to handle headers of spell and spell-like ability blocks
@@ -644,9 +653,23 @@ def parsePage(html):
 
 		pageObject["spell_like_abilities"][t]["freq"] = {}
 		while isinstance(e[i], NavigableString):
-			result = re.search(r'^(.+?)\s*-\s*(.+)$', collectText(["h3", "br"]).strip())
+			s = collectText(["h3", "br"]).strip()
+			result = re.search(r'^([^-]*?at-will[^-]*?|.+?)\s*-\s*(.+)$', s, re.IGNORECASE) # Specially allow at-will before dash like in Kasa-obake
 			if not result is None:
-				pageObject["spell_like_abilities"][t]["freq"][result.group(1)] = splitP(result.group(2))
+				freq = result.group(1)
+				entries = splitP(result.group(2))
+				pageObject["spell_like_abilities"][t]["freq"][freq] = []
+				for entry in entries:
+					entry = entry.strip()
+					entrydict = {}
+					result = re.search(r'^(.+?)\s*(?:\((?:DC (\d+)|(.+?) only)\))?$', entry, re.IGNORECASE)
+					assert not result is None, "Spell-Like Ability Entry Regex failed for " + url + " |" + entry + "|"
+					entrydict["name"] = result.group(1).strip()
+					if not result.group(2) is None:
+						entrydict["DC"] = parseInt(result.group(2))
+					elif not result.group(3) is None:
+						entrydict["target"] = result.group(3).strip()
+					pageObject["spell_like_abilities"][t]["freq"][freq].append(entrydict)
 				skipBr(optional=True)
 			elif (e[i].name == "br" and e[i+1].name == "br") or e[i].name == "h3": # Skip asterisk line if present, like in Szuriel. Kinda hacky and not very tested, hopefully it won't break anything
 				skipBr(optional=True)
@@ -751,7 +774,7 @@ def parsePage(html):
 		pageObject["spells"][t]["level"] = {}
 		while isinstance(e[i], NavigableString):
 			s = collectText(["h3", "br"]).strip()
-			result = re.search(r'^(\d+[^)(]*?)\s*(?:\((?:(at will)|(\d+)(?:/day)?)\))?\s*(-)(?![^()]*\))', s) # Make sure not to get a dash inside parens e.g. Young Occult Dragon
+			result = re.search(r'^(\d+[^)(]*?)\s*(?:\((?:(at[ -]will)|(\d+)(?:/day)?)\))?\s*(-)(?![^()]*\))', s, re.IGNORECASE) # Make sure not to get a dash inside parens e.g. Young Occult Dragon
 			if not result is None:
 				level = result.group(1)
 				pageObject["spells"][t]["level"][level] = {}
@@ -966,31 +989,32 @@ def parsePage(html):
 			pageObject["skill_racial_mods"] = {}
 			s = s_racial
 
-			# Same logic as above, but need to handle 2 different formats ("+4 Perception" vs. "Perception +4")
-			if s[0] in "+-":
-				while s is not None and s.strip() != "":
-					result = re.search(r"^([+-]\d+) ([^,]+)(?: \((.+?)\))?(?:, (.+)?)?", s.strip())
-					if not result is None:
-						if result.group(3) is None:
-							pageObject["skill_racial_mods"][result.group(2)] = parseInt(result.group(1))
-						else:
-							pageObject["skill_racial_mods"].update({result.group(2) + " (" + t + ")": parseInt(result.group(1)) for t in splitP(result.group(3))})
-						s = result.group(4)
+			bonusFirst = s[0] in "+-" # Similar logic as above, but need to handle 2 different formats ("+4 Perception" vs. "Perception +4")
+			while s is not None and s.strip() != "":
+				if bonusFirst:
+					result = re.search(r"^([+-]\d+)\s+([^,)(]+?)(?:\s+\(([^+-][^)]+?)\))?(?:\s+\(([+-][^)]+?)\))?(?:, ([+-].+))?$", s.strip())
+					groupBonus = 1
+					groupSkill = 2
+					groupSkillParen = 3
+				else:
+					result = re.search(r"^([^,)(]+?)(?:\s+\(([^+-][^)]+?)\))?\s+([+-]\d+)(?:\s+\(([+-][^)]+?)\))?(?:, (.+))?$", s.strip())
+					groupBonus = 3
+					groupSkill = 1
+					groupSkillParen = 2
+
+				if not result is None:
+					assert result.group(groupSkillParen) is None or result.group(4) is None, url # Assert there are no double parens to save us the trouble of handling them since they never happen
+				
+					if result.group(groupSkillParen) is None:
+						pageObject["skill_racial_mods"][result.group(groupSkill)] = parseInt(result.group(groupBonus))
+						if not result.group(4) is None:
+							pageObject["skill_racial_mods"][result.group(groupSkill) + "_other"] = result.group(4)
 					else:
-						pageObject["skill_racial_mods"]["other"] = s
-						break
-			else:
-				while s is not None and s.strip() != "": # Complex ingestion process to deal with commas inside parentheses (e.g. "Knowledge (arcana, religion)")
-					result = re.search(r"^(.+?)(?: \((.+?)\))? ([+-]\d+)(?:, (.+)?)?", s.strip())
-					if not result is None:
-						if result.group(2) is None:
-							pageObject["skill_racial_mods"][result.group(1)] = parseInt(result.group(3))
-						else:
-							pageObject["skill_racial_mods"].update({result.group(1) + " (" + t + ")": parseInt(result.group(3)) for t in splitP(result.group(2))})
-						s = result.group(4)
-					else:
-						pageObject["skill_racial_mods"]["other"] = s
-						break
+						pageObject["skill_racial_mods"].update({result.group(groupSkill) + " (" + t + ")": parseInt(result.group(groupBonus)) for t in splitP(result.group(groupSkillParen), sep=r',\s+(?:and\s+)?')})
+					s = result.group(5)
+				else:
+					pageObject["skill_racial_mods"]["other"] = s
+					break
 
 		skipBr(optional=True)
 
@@ -1079,7 +1103,37 @@ def parsePage(html):
 		# For 3.5 entries, get advancement if present
 		if "is_3.5" in pageObject and e[i].name == "b" and e[i].get_text() == "Advancement":
 			i += 1
-			pageObject["ecology"]["advancement_3.5"] = collectText(["h3", "br"]).strip()
+			s = collectText(["h3", "br"]).strip()
+			if s != "none":
+				pageObject["ecology"]["advancement_3.5"] = []
+				entries = splitP(s, sep=r'(?:,| or|(?<=\));)')
+				for entry in entries:
+					entrydict = {}
+					entry = entry.strip()
+					result = re.search(r'^(\d+)(?:-(\d+)|\+) (?:HD )?\((' + "|".join(sizes) + r')\)$', entry, re.IGNORECASE)
+					if not result is None:
+						entrydict = {
+							"type": "size",
+							"HD_min": parseInt(result.group(1)),
+							"size": result.group(3)
+						}
+						if not result.group(2) is None:
+							entrydict["HD_max"] = parseInt(result.group(2))
+
+						pageObject["ecology"]["advancement_3.5"].append(entrydict)
+						continue
+
+					result = re.search("^by character class(?:; Favored Class (.+))?$", entry, re.IGNORECASE)
+					if not result is None:
+						entrydict["type"] = "class"
+						if not result.group(1) is None:
+							entrydict["favored_class"] = result.group(1)
+
+						pageObject["ecology"]["advancement_3.5"].append(entrydict)
+						continue
+
+					raise Exception("Unknown advancement fragment in " + url + " - |" + entry + "|")
+
 			skipBr(optional=True)
 
 

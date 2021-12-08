@@ -5,7 +5,7 @@ import json
 # For nice printing
 def p(d):
 	def set_default(obj):
-		if isinstance(obj, set):
+		if isinstance(obj, set) or isinstance(obj, type({}.keys())):
 			return list(obj)
 		raise TypeError
 

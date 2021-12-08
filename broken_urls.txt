@@ -151,6 +151,8 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Jungle%20Drake
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Rift%20Dragon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Green%20Man
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ashen%20Forgemaster
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Danava
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Anunnaki
 # Special attacks accidentally listed under Space
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Energized%20Ice%20Golem
 # Saving throw issues
@@ -160,6 +162,19 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Frost%20Giant%20Battle%20Priest
 https://aonprd.com/NPCDisplay.aspx?ItemName=Hellknight
 https://aonprd.com/NPCDisplay.aspx?ItemName=Noble%20(Knight)
 https://aonprd.com/NPCDisplay.aspx?ItemName=Acid%20Terror
+# Language not properly bolded
+https://aonprd.com/MonsterDisplay.aspx?ItemName=The%20Grim%20White%20Stag
+# Racial Modifier section not properly labeled and not bolded
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Sunflower%20Leshy
+# Errant space in skills
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Poison%20Frog
+# Dead link (but appears in mythic monster list)
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Human%20Skeleton
+# Errant newline in the middle of the 3/day line of spell-like abilities
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Glaistig
+# Initiative/senses line broken in various ways
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Irii
+
 
 
 # ==== TBD =====
@@ -181,29 +196,16 @@ https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Shen
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Rakshasa
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Portunus
 Racial Modifier things:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Salamander
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cloaker
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Chon%20Chon%20Swarm
-https://aonprd.com/MonsterDisplay.aspx?ItemName=The%20Grim%20White%20Stag
 Two AC lines smh:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Unfettered%20Phantom
 Unique line after alignment line:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ugash-Iram
-Skills issue:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Sunflower%20Leshy
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Poison%20Frog
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Vexgit
 Ability in the Resist section for some godforsaken reason:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=First%20Blade
 https://aonprd.com/MonsterDisplay.aspx?ItemName=The%20Would-Be%20Queen,%20Almara%20Kazaar
 Occultist implements:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Reborn%20Samsaran
-Two initiatives, what the fuck:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Irii
-# No attack damage (because attack is damageless)
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghristah
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Croaker
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Furcifer
 # Melee attack special syntax
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Arcanaton
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Canopy%20Creeper

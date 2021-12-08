@@ -39,5 +39,4 @@ if __name__ == "__main__":
 
 		# Avoid getting rate limited
 		if tSpent < 0.2:
-			print("Sleeping " + str(0.2 - tSpent) + "s")
 			time.sleep(0.2 - tSpent)
