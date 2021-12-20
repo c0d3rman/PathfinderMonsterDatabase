@@ -26,7 +26,6 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Shenzuzhou
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Failed%20Prophet
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Relictner
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ratfolk%20Troubleshooter
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Duergar%20Tyrant
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Khardajeen
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Gravesludge
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Living%20Doldrums
@@ -153,6 +152,8 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Green%20Man
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ashen%20Forgemaster
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Danava
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Anunnaki
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Neh-Thalggu
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Apkallu
 # Special attacks accidentally listed under Space
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Energized%20Ice%20Golem
 # Saving throw issues
@@ -174,38 +175,60 @@ https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Human%20Skeleton
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Glaistig
 # Initiative/senses line broken in various ways
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Irii
+# Special Attacks repeated twice
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Dosojin
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Shadow%20Golem
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Nixudaemon
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Wretchghost
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Lapsudaemon
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Thunder%20Behemoth
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Thalassic%20Behemoth
+# Psychic Discipline not bolded
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Astomoi
+# Bloodline not bolded
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghoul%20Monarch
+# Missing comma in summon parenthetical
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Olethrodaemon
+# Blank line
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Werewasp%20(Human%20Form)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Werewasp%20(Hybrid%20Form)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Escorite
+# Missing newlines between spell levels
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Paradise%20Dragon
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Skrimsl
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Nephlei
+# Missing comma between spells
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Possession%20Devil,%20Greater%20(Gidim)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Ancient%20Underworld%20Dragon
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Underworld%20Dragon
+# Trailing comma in spells
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Cetaceal
+# Extra comma in spells
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Scyld%20Hranni,%20Storm%20Giant%20Matriarch
+# Trailing comma in 1st level spells (might be spells missing)
+https://aonprd.com/NPCDisplay.aspx?ItemName=Vaultbreaker
+# Missing space after comma between fire storm and elemental body IV
+https://aonprd.com/NPCDisplay.aspx?ItemName=Rage%20Flame
+# Says "DR" instead of "Immune"
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Psychic%20Stalker
+# Says "DR" instead of "Defensive Abilities"
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Gunpowder%20Ooze
+# "Cleric Spells Prepared" not bolded
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Kortash%20Khain
+# Extraneous comma in skills: "Climb +10, (+12 ropes)"
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Forge%20Spurned
+# Missing e in "Knowledg" in skills
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Nimbral%20Child
+# Missing comma in skills
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Demilich
 
 
 
 # ==== TBD =====
-Asterisk:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Orania,%20Cloud%20Giant%20Oligarch
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Vildeis
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cernunnos
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Mother%27s%20Maw
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Oozlosh,%20Marsh%20Giant%20High%20Priest
-Mythic monsters yet-to-be-added that have an M line (many of which won't work with current handling):
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Lich
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Arazni
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Apkallu
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Old-Mage%20Jatembe
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Kortash%20Khain
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Wyrm%20Red%20Dragon
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Solar%20Pitri%20(Agnishvatta)
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Shen
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Rakshasa
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Portunus
-Racial Modifier things:
+# Racial Modifier things:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Chon%20Chon%20Swarm
-Two AC lines smh:
+# Two AC lines:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Unfettered%20Phantom
-Unique line after alignment line:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ugash-Iram
-Ability in the Resist section for some godforsaken reason:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=First%20Blade
-https://aonprd.com/MonsterDisplay.aspx?ItemName=The%20Would-Be%20Queen,%20Almara%20Kazaar
-Occultist implements:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Reborn%20Samsaran
 # Melee attack special syntax
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Arcanaton
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Canopy%20Creeper

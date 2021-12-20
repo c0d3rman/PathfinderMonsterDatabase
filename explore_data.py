@@ -37,7 +37,9 @@ if __name__ == "__main__":
 	# d = {k: v for k, v in d.items() if "is_3.5" not in v}
 	# print(" done")
 	
-	def join_nested_dicts_of_sets(l): # l is a nonempty list of nested dicts, where all leaves are sets
+	def join_nested_dicts_of_sets(l): # l is a list of nested dicts, where all leaves are sets
+		if len(l) == 0:
+			return {}
 		if type(l[0]) is set:
 			return set().union(*[x for x in l])
 
