@@ -120,6 +120,8 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Enlightened%20Construct%20Clockw
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Flaming%20Skull
 # Trailing comma
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Formless%20Spawn
+# Missing comma between melee attacks
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Shantak
 
 
 # ==== REPORTED ISSUES ====
@@ -221,12 +223,19 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Forge%20Spurned
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Nimbral%20Child
 # Missing comma in skills
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Demilich
+# Special Attacks not bolded and not on new line
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghoul%20Commander
+# Missing space after "or" in Attacks
+https://aonprd.com/NPCDisplay.aspx?ItemName=Sundering%20Axe
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Troglodyte
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Incubus
+https://aonprd.com/NPCDisplay.aspx?ItemName=Dwarven%20Rager
+# Missing end of line in Ranged Attacks (trailing or)
+https://aonprd.com/NPCDisplay.aspx?ItemName=Stage%20Magician
 
 
 
 # ==== TBD =====
-# Racial Modifier things:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Chon%20Chon%20Swarm
 # Two AC lines:
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Unfettered%20Phantom
 # Melee attack special syntax

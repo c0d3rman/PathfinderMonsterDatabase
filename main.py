@@ -7,19 +7,20 @@ include3_5 = True
 
 """
 TODO
-- The current handling of \r and other weird newlines introduces a lot of spaces in the wrong places. Need better solution. See Lastwall Border Scout
-- Go over the TBD broken urls
-- Swap to manual list of skills for racial mod handling (so I can do better parsing of e.g. "Survival (in snow)" vs "Craft (traps)")
 - Look over skills for problems
-- Merge melee and ranged attack processing
+- Look over racial mods for problems and special cases (e.g. "(in snow)")
+- Check and fix attack parsing (e.g. damage type before slash)
+- Add splitting parentheticals to racial mods, and probably unify some stuff across skills / racial mods
+- Maybe swap to manual skill-list for racial mod parsing for cases where the skill isn't in the main skill list, e.g. "Perception relating to stonework"
 
 Handle some special cases:
 Strange melee attacks
 - https://aonprd.com/MonsterDisplay.aspx?ItemName=Malbolgian%20Cerberi - double plus
-- https://aonprd.com/MonsterDisplay.aspx?ItemName=Accomplice%20Devil%20(Hesperian) - extra parens
-- https://aonprd.com/MonsterDisplay.aspx?ItemName=Draugr%20Pirate - weird space/non-ascii character instead of X (might have a similar issue in others)
+- https://aonprd.com/MonsterDisplay.aspx?ItemName=Arcanaton - Plus outside parens
 Strange ranged attacks
 - https://aonprd.com/MonsterDisplay.aspx?ItemName=Canopy%20Creeper - grab before plus
+Two AC lines
+- https://aonprd.com/MonsterDisplay.aspx?ItemName=Unfettered%20Phantom
 """
 
 
@@ -58,7 +59,9 @@ def parsePage(html, url):
 	pageObject = {}
 
 	# Clean up HTML
-	html = html.replace("\r\n", " ").replace("\r", " ").replace(chr(10), " ").replace('\xad', '') # Fix weird whitespace in some entries (e.g. Vermlek, Achaierai, Signifer of the Nail, Vampiric Mist)
+	regex = r'(?:\r\n|\r|\xad|' + chr(10) + ')+' # Fix weird whitespace in some entries (e.g. Vermlek, Achaierai, Signifer of the Nail, Vampiric Mist)
+	html = re.sub(r'(?<=\s+)' + regex + r'|' + regex + r'(?=\s+)', r'', html) # First handle weird whitespace bordering regular whitespace - just delete it
+	html = re.sub(regex, r' ', html) # Then handle weird whitespace bordering non-whitespace - replace with a space
 	html = re.sub(r'(?<!<\s*br\s*>\s*)<\s*/\s*br\s*>', r'<br/>', html) # Fix broken <br> tags in some pages, e.g. Vilderavn. Uses a variable-width negative lookbehind, so we use the regex module instead of the re module
 	html = re.sub(r'[−—–‐‑‒―]|&ndash;|&mdash;', "-", html) # No reason to deal with all these different dashes
 
@@ -148,6 +151,14 @@ def parsePage(html, url):
 	asterisk_options = ["**", "*", "†"] # Should put things like ** before * for regex matching and such
 	def handleAsterisk(s):
 		return re.sub(r'(?:' + r'|'.join(re.escape(x) for x in asterisk_options) + r')', '', s).strip()
+
+	# Helper to update nested dicts
+	def updateNestedDict(d1, d2):
+		for k in d2:
+			if not k in d1:
+				d1[k] = d2[k]
+			else:
+				d1[k].update(d2[k])
 
 	# Sweep for asterisk lines, then return back to the beginning to start the real parse
 	while i < len(e) - 1:
@@ -561,24 +572,29 @@ def parsePage(html, url):
 
 	skipBr()
 
-	# Get melee attacks if present
-	if e[i].name == "b" and e[i].get_text() == "Melee":
-		i += 1
-		s = handleAsterisk(collectText(["h3", "b"]).strip())
+	# Get melee and ranged attacks if present
+	for attack_type in ["Melee", "Ranged"]:
+		if e[i].name == "b" and e[i].get_text() == attack_type:
+			i += 1
+			s = handleAsterisk(collectText(["h3", "b"]).strip())
 
-		if s != "---": # Special case - no melee attack (currently only present in Lar)
-			pageObject["attacks_melee"] = []
+			if attack_type == "Melee" and s == "---": # Special case - no melee attack (currently only present in Lar)
+				continue
+
+			key = "attacks_" + attack_type.lower()
+			pageObject[key] = []
+
 			groups = splitP(s, sep=r'(?<=\))[;,]?\s+or\s+')
 			for group in groups:
-				entries = splitP(group.strip())
+				entries = splitP(group.strip(), sep=r'(?:, ?| and )')
 				group_list = []
 				for entry in entries:
 					entry = entry.strip()
 					attack_dict = {"text": entry}
 
 					# First, process the body and separate the parenthetical
-					result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+melee)?(\s+touch)?\s*(?:\(([^)]+)\))?$', entry)
-					assert not result is None, "Melee Attack Regex 1 failed for " + url
+					result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+(?:(?:melee|ranged)\s+)?(touch))?\s*(?:\(([^)]+)\))?\s*(?:\(([^)]+)\))?$', entry)
+					assert not result is None, "Attack Regex failed for " + url + " |" + entry + "|"
 					if not result.group(1) is None:
 						attack_dict["count"] = parseInt(result.group(1))
 					attack_dict["attack"] = result.group(2)
@@ -586,11 +602,13 @@ def parsePage(html, url):
 						attack_dict["bonus"] = [parseInt(x) for x in splitP(result.group(3), sep=r'/')]
 					if not result.group(4) is None:
 						attack_dict["touch"] = True
+					if not result.group(6) is None:
+						attack_dict["restriction"] = result.group(6).strip()
 
 					# Now, process the parenthetical
 					if not result.group(5) is None:
 						p = result.group(5).strip()
-						result = re.search(r'^(\d+(?:d\d+)?(?:[+-]\d+)?)?\s*(?:/(\d+\s*-\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?(?:(?:, )?DC (\d+))$', p)
+						result = re.search(r'^(\d+(?:d\d+)?\s*(?:[+-]\d+)?)?\s*(?:/(\d+\s*-\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?(?:(?:, )?DC (\d+))?$', p)
 						if result is None:
 							attack_dict["effects"] = p
 						else:
@@ -615,60 +633,8 @@ def parsePage(html, url):
 
 					group_list.append(attack_dict)
 					
-				pageObject["attacks_melee"].append(group_list)
+				pageObject[key].append(group_list)
 	
-	# Get ranged attacks if present
-	if e[i].name == "b" and e[i].get_text() == "Ranged":
-		i += 1
-		pageObject["attacks_ranged"] = []
-		groups = splitP(handleAsterisk(collectText(["h3", "b"]).strip()), sep=r'(?<=\))[;,]?\s+or\s+')
-		for group in groups:
-			entries = splitP(group.strip())
-			group_list = []
-			for entry in entries:
-				entry = entry.strip()
-				attack_dict = {"text": entry}
-
-				# First, process the body and separate the parenthetical
-				result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+(?:ranged\s+)?(touch))?\s*(?:\(([^)]+)\))?$', entry)
-				assert not result is None, "Ranged Attack Regex 1 failed for " + url
-				if not result.group(1) is None:
-					attack_dict["count"] = parseInt(result.group(1))
-				attack_dict["attack"] = result.group(2)
-				if not result.group(3) is None:
-					attack_dict["bonus"] = [parseInt(x) for x in splitP(result.group(3), sep=r'/')]
-				if result.group(4) == "touch":
-					attack_dict["touch"] = True
-
-				# Now, process the parenthetical
-				if not result.group(5) is None:
-					p = result.group(5).strip()
-					result = re.search(r'^(\d+(?:d\d+)?(?:[+-]\d+)?)?\s*(?:/(\d+\s*-\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?(?:(?:, )?DC (\d+))$', p)
-					if result is None:
-						attack_dict["effects"] = p
-					else:
-						if result.group(1) is None:
-							assert result.group(2) is None and result.group(3) is None and result.group(4) is None and result.group(6) is None, url
-						else:
-							attack_dict["damage"] = result.group(1)
-							if not result.group(2) is None:
-								attack_dict["crit_range"] = result.group(2)
-							if not result.group(3) is None:
-								attack_dict["crit_multiplier"] = parseInt(result.group(3))
-							if not result.group(4) is None or not result.group(6) is None:
-								assert result.group(4) is None or result.group(6) is None, urls # Can't have both at the same time, so make sure one is None
-								if result.group(4) is None:
-									attack_dict["damage_type"] = result.group(6)
-								else:
-									attack_dict["damage_type"] = result.group(4)
-							if not result.group(5) is None:
-								attack_dict["effects"] = result.group(5)
-							if not result.group(7) is None:
-									attack_dict["DC"] = parseInt(result.group(7))
-
-				group_list.append(attack_dict)
-			pageObject["attacks_ranged"].append(group_list)
-
 	# Get space if present
 	if e[i].name == "b" and e[i].get_text() == "Space":
 		i += 1
@@ -1284,9 +1250,17 @@ def parsePage(html, url):
 			else:
 				assert result.group(2) is None, url + " |" + entry + "|"
 
-			pageObject["skills"].update({skillName: parseInt(result.group(3)) for skillName in skillNames})
+			updateNestedDict(pageObject["skills"], {skillName: {"_": parseInt(result.group(3))} for skillName in skillNames})
+
 			if result.group(4) is not None:
-				pageObject["skills"].update({skillName + "_other": result.group(4).strip() for skillName in skillNames})
+				pentries = splitP(result.group(4).strip())
+				for pentry in pentries:
+					pentry = pentry.strip()
+					result = re.search(r'^([+-]\d+)\s+(.+?)$', pentry)
+					if not result is None:
+						updateNestedDict(pageObject["skills"], {skillName: {result.group(2).strip(): parseInt(result.group(1))} for skillName in skillNames})
+					else:
+						updateNestedDict(pageObject["skills"], {skillName: {"_other": pentry} for skillName in skillNames})
 
 			# Save raw entry for perception mismatch checking later
 			if name == "Perception":
@@ -1297,32 +1271,60 @@ def parsePage(html, url):
 			pageObject["skill_racial_mods"] = {}
 			s = s_racial
 
-			bonusFirst = s[0] in "+-" # Similar logic as above, but need to handle 2 different formats ("+4 Perception" vs. "Perception +4")
-			while s is not None and s.strip() != "":
-				if bonusFirst:
-					result = re.search(r"^([+-]\d+)\s+([^,)(]+?)(?:\s+\(([^+-][^)]+?)\))?(?:\s+\(([+-][^)]+?)\))?(?:, ([+-].+))?$", s.strip())
-					groupBonus = 1
-					groupSkill = 2
-					groupSkillParen = 3
-				else:
-					result = re.search(r"^([^,)(]+?)(?:\s+\(([^+-][^)]+?)\))?\s+([+-]\d+)(?:\s+\(([+-][^)]+?)\))?(?:, (.+))?$", s.strip())
-					groupBonus = 3
-					groupSkill = 1
-					groupSkillParen = 2
-
+			def processRacialModEntry(entry, existing_skills):
+				# The most common format by far, e.g. "+8 Stealth (+16 in forests)"
+				result = re.search(r'^([+-]\d+)\s+(.+?)(?:\s+\(([+-]\d+\s+[^)]+?)\))?$', entry.strip())
 				if not result is None:
-					assert result.group(groupSkillParen) is None or result.group(4) is None, url # Assert there are no double parens to save us the trouble of handling them since they never happen
-				
-					if result.group(groupSkillParen) is None:
-						pageObject["skill_racial_mods"][result.group(groupSkill)] = parseInt(result.group(groupBonus))
-						if not result.group(4) is None:
-							pageObject["skill_racial_mods"][result.group(groupSkill) + "_other"] = result.group(4)
-					else:
-						pageObject["skill_racial_mods"].update({result.group(groupSkill) + " (" + t + ")": parseInt(result.group(groupBonus)) for t in splitP(result.group(groupSkillParen), sep=r',\s+(?:and\s+)?')})
-					s = result.group(5)
-				else:
-					pageObject["skill_racial_mods"]["other"] = s
-					break
+					bonus = parseInt(result.group(1))
+					skill = result.group(2).strip()
+					paren = result.group(3)
+					category = ""
+					
+					# Check against existing skills for e.g. "Diplomacy when influencing rats"
+					# Sort by length to test for longer ones first
+					for k in sorted(existing_skills.keys(), key=lambda s: len(s), reverse=True):
+						result = re.search(r'^(?:(?:in|on)\s+)?' + re.escape(k) + r'(.*?)$', skill)
+						if not result is None:
+							category = result.group(1).strip()
+							skill = k
+							break
+					if category == "":
+						category = "_"
+
+					out = {skill: {category: bonus}}
+					if not paren is None:
+						for entry in re.split(r',\s*(?=[+-]\d+)', paren):
+							result = re.search(r'^([+-]\d+)\s+(.+?)$', entry.strip())
+							out[skill][result.group(2).strip()] = parseInt(result.group(1))
+					return out
+
+				# Rare format, e.g. "Stealth +16"
+				result = re.search(r'^(.+?)\s+([+-]\d+)$', entry.strip())
+				if not result is None:
+					return {result.group(1).strip(): {"_": parseInt(result.group(2))}}
+
+				# Rare format, e.g. "Acrobatics (+4 when jumping)"
+				result = re.search(r'^(.+?)\s+\(([+-]\d+)\s+([^)]+?)\)$', entry.strip())
+				if not result is None:
+					return {result.group(1).strip(): {result.group(3).strip(): parseInt(result.group(2))}}
+
+				return None
+
+			entries = splitP(s)
+			while len(entries) > 0:
+				entry = entries.pop(0)
+				while len(entries) > 0 and processRacialModEntry(entries[0], pageObject["skills"]) is None:
+					entry += ", " + entries.pop(0)
+
+				result = processRacialModEntry(entry, pageObject["skills"])
+				if result is None:
+					assert not "_other" in pageObject["skill_racial_mods"], url
+					pageObject["skill_racial_mods"]["_other"] = entry
+					continue
+
+				updateNestedDict(pageObject["skill_racial_mods"], result)
+
+		# pageObject["skill_racial_mods"].update({result.group(groupSkill) + " (" + t + ")": parseInt(result.group(groupBonus)) for t in splitP(result.group(groupSkillParen), sep=r',\s+(?:and\s+)?')})
 
 		skipBr(optional=True)
 
@@ -1529,9 +1531,6 @@ if __name__ == "__main__":
 		# Skip urls pre-marked as broken
 		if url in broken_urls:
 			continue
-
-		# if url != "https://aonprd.com/MonsterDisplay.aspx?ItemName=Lusca":
-		# 	continue
 
 		with open(sys.argv[1] + "/" + str(i) + ".html") as file:
 			html = file.read()

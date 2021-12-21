@@ -6,23 +6,56 @@ import json
 def p(d):
 	def set_default(obj):
 		if isinstance(obj, set) or isinstance(obj, type({}.keys())):
-			return list(obj)
+			return sorted(list(obj))
 		raise TypeError
 
 	print(json.dumps(d, indent=2, default=set_default))
 
 # For searching a nested dict for stuff
-def search(d, s, caseSensitive=True):
+def contains(d, s, caseSensitive=True):
 	if type(d) is dict:
-		return any(search(d2, s) for d2 in d.values()) or any(search(d2, s) for d2 in d.keys())
+		return any(contains(d2, s, caseSensitive=caseSensitive) for d2 in d.values()) or any(contains(d2, s, caseSensitive=caseSensitive) for d2 in d.keys())
 	elif type(d) is list or type(d) is set:
-		return any(search(d2, s) for d2 in d)
+		return any(contains(d2, s, caseSensitive=caseSensitive) for d2 in d)
 	elif type(d) is str:
 		if not caseSensitive:
 			d = d.lower()
 		return s in d
 	else:
 		return d == s
+
+def search(d, s, caseSensitive=True):
+	if type(d) is dict:
+		out = {}
+		for k, v in d.items():
+			t = search(v, s, caseSensitive=caseSensitive)
+			if t:
+				out[k] = t
+				continue
+			t = search(k, s, caseSensitive=caseSensitive)
+			if t:
+				out[k] = t
+				continue
+		if len(out) > 0:
+			return out
+	elif type(d) is list or type(d) is set:
+		out = []
+		for d2 in d:
+			t = search(d2, s, caseSensitive=caseSensitive)
+			if t:
+				out.append(t)
+		if len(out) > 0:
+			return out
+	elif type(d) is str:
+		d2 = d
+		if not caseSensitive:
+			d2 = d2.lower()
+			s = s.lower()
+		if s in d2:
+			return d
+	else:
+		if d == s:
+			return d
 
 
 
