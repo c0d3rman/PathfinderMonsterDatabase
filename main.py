@@ -12,6 +12,7 @@ TODO
 - Check and fix attack parsing (e.g. damage type before slash)
 - Add splitting parentheticals to racial mods, and probably unify some stuff across skills / racial mods
 - Maybe swap to manual skill-list for racial mod parsing for cases where the skill isn't in the main skill list, e.g. "Perception relating to stonework"
+- Add comments to all uncommented broken urls
 
 Handle some special cases:
 Strange melee attacks
@@ -19,8 +20,6 @@ Strange melee attacks
 - https://aonprd.com/MonsterDisplay.aspx?ItemName=Arcanaton - Plus outside parens
 Strange ranged attacks
 - https://aonprd.com/MonsterDisplay.aspx?ItemName=Canopy%20Creeper - grab before plus
-Two AC lines
-- https://aonprd.com/MonsterDisplay.aspx?ItemName=Unfettered%20Phantom
 """
 
 
@@ -37,6 +36,7 @@ import sys
 import traceback
 from tqdm import tqdm
 from copy import deepcopy
+import os
 
 
 
@@ -258,7 +258,14 @@ def parsePage(html, url):
 	i += 1
 	pageObject["sources"] = []
 	while e[i].name == "a":
-		pageObject["sources"].append({"name": e[i].get_text(), "link": e[i]["href"].strip()}) # Strip weird whitespace in some entries (e.g. Vermlek)
+		s = e[i].get_text()
+		result = re.search(r'^(.+?) pg\. (\d+)', s)
+		assert not result is None, url + " |" + s + "|"
+		pageObject["sources"].append({
+			"name": result.group(1).strip(),
+			"page": parseInt(result.group(2)),
+			"link": e[i]["href"].strip()
+		}) # Strip weird whitespace in some entries (e.g. Vermlek)
 		i += 1
 		if isinstance(e[i], NavigableString): # Skip comma text node
 			i += 1
@@ -397,25 +404,28 @@ def parsePage(html, url):
 	s = collectText(["br"]).strip()
 	result = re.search(r'^(-?\d+)[,;]\s+touch\s+(-?\d+)[,;]\s+flat-?footed\s+(-?\d+)(?:\s*;?\s*\((.+?)\))?(?:;?\s*(.+))?\.?$', s) # Accepts ; as well as , because of broken formatting on pages like Bugbear Lurker. Skip broken formatting trailing period in e.g. Flying Fox
 	assert not result is None, "AC Regex failed for " + url
-	pageObject["AC"] = parseInt(result.group(1))
-	pageObject["AC_touch"] = parseInt(result.group(2))
-	pageObject["AC_flatfooted"] = parseInt(result.group(3))
+	pageObject["AC"] = {
+		"AC": parseInt(result.group(1)),
+		"touch": parseInt(result.group(2)),
+		"flat_footed": parseInt(result.group(3))
+	}
 	if not result.group(5) is None:
-		pageObject["AC_other"] = result.group(5)
-		if pageObject["AC_other"].startswith("(") and pageObject["AC_other"].endswith(")"):
-			pageObject["AC_other"] = pageObject["AC_other"][1:-1]
+		s = result.group(5)
+		if s.startswith("(") and s.endswith(")"):
+			s = s[1:-1]
+		pageObject["AC"]["other"] = s.strip()
 	if not result.group(4) is None:
 		entries = splitP(result.group(4), sep=r'[,;] ')
-		pageObject["AC_components"] = {}
+		pageObject["AC"]["components"] = {}
 		for entry in entries:
 			entry = entry.strip() # Fixes whitespace issues in e.g. Malsandra (probably caused by \r handling)
 			result = re.search(r'^([+-]\d+)\s+(.+)$', entry)
 			if not result is None:
-				pageObject["AC_components"][result.group(2).lower().strip()] = parseInt(result.group(1))
+				pageObject["AC"]["components"][result.group(2).lower().strip()] = parseInt(result.group(1))
 			else:
-				if not "other" in pageObject["AC_components"]:
-					pageObject["AC_components"]["other"] = []
-					pageObject["AC_components"]["other"].append(entry)
+				if not "other" in pageObject["AC"]["components"]:
+					pageObject["AC"]["components"]["other"] = []
+				pageObject["AC"]["components"]["other"].append(entry)
 	skipBr()
 
 	# Get HP, and fast healing / regeneration / other HP abilities if present
@@ -425,18 +435,20 @@ def parsePage(html, url):
 	s = handleAsterisk(e[i].strip())
 	result = re.search(r'^(\d+)(?:\s+each)?\s*\((?:(\d+)\s+HD;\s+)?(.+?)\)(?:[;,] (.+))?$', s) # Supports , instead of ; for broken formatting on pages like Egregore
 	assert not result is None, "HP Regex failed for " + url
-	pageObject["HP"] = parseInt(result.group(1))
-	pageObject["HP_long"] = result.group(3)
+	pageObject["HP"] = {
+		"HP": parseInt(result.group(1)),
+		"long": result.group(3)
+	}
 	if result.group(2) is not None:
-		pageObject["HD"] = parseInt(result.group(2))
+		pageObject["HP"]["HD"] = parseInt(result.group(2))
 	if result.group(4) is not None:
 		result2 = re.search(r'^(fast healing|regeneration)\s+(\d+)(?:\s*\((.+?)\))?$', result.group(4).strip())
 		if not result2 is None:
-			pageObject[result2.group(1).replace(" ", "_")] = parseInt(result2.group(2))
+			pageObject["HP"][result2.group(1).replace(" ", "_")] = parseInt(result2.group(2))
 			if not result2.group(3) is None:
-				pageObject[result2.group(1).replace(" ", "_") + "_weakness"] = result2.group(3).strip()
+				pageObject["HP"][result2.group(1).replace(" ", "_") + "_weakness"] = result2.group(3).strip()
 		else:
-			pageObject["HP_other"] = result.group(4)
+			pageObject["HP"]["other"] = result.group(4)
 	i += 1
 	skipBr()
 
@@ -1515,24 +1527,29 @@ def parsePage(html, url):
 
 
 if __name__ == "__main__":
+	if len(sys.argv) > 1:
+		datapath = sys.argv[1]
+	else:
+		datapath = "data/"
+
 	urls = []
-	with open(sys.argv[1] + "/urls.txt") as file:
+	with open(os.path.join(datapath, "urls.txt")) as file:
 		for line in file:
 			urls.append(line.rstrip())
 
 	broken_urls = []
 	with open("broken_urls.txt") as file:
 		for line in file:
-			broken_urls.append(line.rstrip())
+			if not line.strip() == "" and not line.strip().startswith("#"):
+				broken_urls.append(line.rstrip())
 
 	pageObjects = {}
 	for i, url in enumerate(tqdm(urls)):
-	# for i, url in enumerate(urls):
 		# Skip urls pre-marked as broken
 		if url in broken_urls:
 			continue
 
-		with open(sys.argv[1] + "/" + str(i) + ".html") as file:
+		with open(os.path.join(datapath, str(i) + ".html")) as file:
 			html = file.read()
 
 		try:
@@ -1546,5 +1563,5 @@ if __name__ == "__main__":
 		if not include3_5 and url in pageObject:
 			del pageObject[url]
 
-	with open(sys.argv[1] + '/data.json', 'w') as fp:
+	with open(os.path.join(datapath, 'data.json'), 'w') as fp:
 		json.dump(pageObjects, fp)

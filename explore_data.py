@@ -1,5 +1,6 @@
 import sys
 import json
+from copy import deepcopy
 
 
 # For nice printing
@@ -60,8 +61,13 @@ def search(d, s, caseSensitive=True):
 
 
 if __name__ == "__main__":
+	if len(sys.argv) > 1:
+		datapath = sys.argv[1]
+	else:
+		datapath = "data/data.json"
+
 	print("Loading data...", end="", flush=True)
-	with open(sys.argv[1]) as f:
+	with open(datapath) as f:
 		d = json.load(f)
 	print(" done")
 
@@ -97,19 +103,25 @@ if __name__ == "__main__":
 	print(" done")
 
 	# Use lookups to generate counts and the main dict
+	# Will break on empty dicts or lists, but those really shouldn't be in the data anyway
 	print("Generating unique_leaves and unique_leaves_counts...", end="", flush=True)
-	def generate_main_and_counts(unique_leaves_lookup, unique_leaves, unique_leaves_counts):
-		for k, v in unique_leaves_lookup.items():
-			if type(v[list(v.keys())[0]]) is dict: # Will break on empty sets, but those really shouldn't be in the data anyway
-				unique_leaves[k] = {}
-				unique_leaves_counts[k] = {}
-				generate_main_and_counts(v, unique_leaves[k], unique_leaves_counts[k])
-			else:
-				unique_leaves[k] = set(v.keys())
-				unique_leaves_counts[k] = {k2: len(v2) for k2, v2 in sorted(v.items(), key=lambda item: len(item[1]))} # Sort the counts dict for easier use
-	unique_leaves = {}
-	unique_leaves_counts = {}
-	generate_main_and_counts(unique_leaves_lookup, unique_leaves, unique_leaves_counts)
+	unique_leaves = deepcopy(unique_leaves_lookup)
+	unique_leaves_counts = deepcopy(unique_leaves_lookup)
+	def generate_main_and_counts(d1, d2):
+		assert type(d1) is dict
+
+		# Base case: dict with set values
+		if type(d1[list(d1.keys())[0]]) is set: # Assume d1 and d2 synced
+			return True
+
+		for k in d1:
+			if generate_main_and_counts(d1[k], d2[k]):
+				d1[k] = list(d1[k].keys())
+				d2[k] = {k2: len(v2) for k2, v2 in d2[k].items()}
+
+		return False
+
+	generate_main_and_counts(unique_leaves, unique_leaves_counts)
 	print(" done")
 
 

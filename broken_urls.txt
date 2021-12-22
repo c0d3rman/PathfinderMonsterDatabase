@@ -1,49 +1,7 @@
-https://aonprd.com/NPCDisplay.aspx?ItemName=Death%20Dealer
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Braismois
-https://aonprd.com/NPCDisplay.aspx?ItemName=Expert%20Blacksmith
-https://aonprd.com/NPCDisplay.aspx?ItemName=Cyphermage
-https://aonprd.com/NPCDisplay.aspx?ItemName=Winter%20Witch%20Baroness
-https://aonprd.com/NPCDisplay.aspx?ItemName=Adventuring%20Blacksmith
-https://aonprd.com/NPCDisplay.aspx?ItemName=Android%20Impostor
-https://aonprd.com/NPCDisplay.aspx?ItemName=Harrower
-https://aonprd.com/NPCDisplay.aspx?ItemName=Halfling%20Slinger
-https://aonprd.com/NPCDisplay.aspx?ItemName=Cave%20Stalker
-https://aonprd.com/NPCDisplay.aspx?ItemName=Nimble%20Shuriken%20Thrower
-https://aonprd.com/NPCDisplay.aspx?ItemName=Sister%20of%20the%20Golden%20Erinyes
-https://aonprd.com/NPCDisplay.aspx?ItemName=Savage%20Rider
-https://aonprd.com/NPCDisplay.aspx?ItemName=Cannibal%20Zealot
-https://aonprd.com/NPCDisplay.aspx?ItemName=Demon-Blooded%20Sorcerer
-https://aonprd.com/NPCDisplay.aspx?ItemName=Lucky%20Mage
-https://aonprd.com/NPCDisplay.aspx?ItemName=Queen%20of%20Staves
-https://aonprd.com/NPCDisplay.aspx?ItemName=Azure%20Bolt%20Sorcerer
-https://aonprd.com/NPCDisplay.aspx?ItemName=Technic%20League%20Captain
-https://aonprd.com/NPCDisplay.aspx?ItemName=Shadow%20Cleric
-https://aonprd.com/NPCDisplay.aspx?ItemName=Beggar
-https://aonprd.com/NPCDisplay.aspx?ItemName=Notorious%20Foil
-https://aonprd.com/NPCDisplay.aspx?ItemName=Winter%20Witch%20Cold%20Sister
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Khala
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Shenzuzhou
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Failed%20Prophet
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Relictner
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ratfolk%20Troubleshooter
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Khardajeen
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Gravesludge
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Living%20Doldrums
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Elder%20Deep%20One
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Whirlmaw
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Equine%20Bone%20Golem
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Kasthezvi
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Prydanu
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Pleroma
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ancient%20Edict%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Dreamthief%20Hag
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tletli
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Chortov
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Sodden%20Drauger%20Troop
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Charon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Calaca
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Basavan
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Chuul,%20Lesser
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Chuul%2C%20Lesser
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Deep%20Walker
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Fyndylsnitch%20the%20Shadowking
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Soulpierced
@@ -105,12 +63,12 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Cultist%20Troop
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Zalyakavat
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Enisysian
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Grootslang
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Kaltestrua,%20Governess%20of%20Casnoriva
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Kaltestrua%2C%20Governess%20of%20Casnoriva
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Putrid%20Ooze
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Voice%20of%20the%20Damned
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Neothelid%20Overlord
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Oronci
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Thath-Malal,%20the%20Eyeless%20Prince
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Thath-Malal%2C%20the%20Eyeless%20Prince
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Clockwork%20Fiend
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Blood%20Lily
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Enlightened%20Construct%20Clockwork%20Soldier
@@ -148,6 +106,11 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Xenarth
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Dahzagan
 # AC missing comma
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Jungle%20Drake
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Khardajeen
+# typo in AC block - ".1" instead of "-1"
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Equine%20Bone%20Golem
+# Says "AC" twice
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Living%20Doldrums
 # Broken HTML
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Rift%20Dragon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Green%20Man
@@ -156,6 +119,17 @@ https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Danava
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Anunnaki
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Neh-Thalggu
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Apkallu
+https://aonprd.com/NPCDisplay.aspx?ItemName=Death%20Dealer
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Braismois
+https://aonprd.com/NPCDisplay.aspx?ItemName=Cyphermage
+https://aonprd.com/NPCDisplay.aspx?ItemName=Halfling%20Slinger
+https://aonprd.com/NPCDisplay.aspx?ItemName=Savage%20Rider
+https://aonprd.com/NPCDisplay.aspx?ItemName=Shadow%20Cleric
+https://aonprd.com/NPCDisplay.aspx?ItemName=Notorious%20Foil
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Gravesludge
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Elder%20Deep%20One
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Prydanu
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Sodden%20Drauger%20Troop
 # Special attacks accidentally listed under Space
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Energized%20Ice%20Golem
 # Saving throw issues
@@ -177,6 +151,9 @@ https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Human%20Skeleton
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Glaistig
 # Initiative/senses line broken in various ways
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Irii
+# Missing perception from Senses block
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Whirlmaw
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Dreamthief%20Hag
 # Special Attacks repeated twice
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Dosojin
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Shadow%20Golem
@@ -200,7 +177,7 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Paradise%20Dragon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Skrimsl
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Nephlei
 # Missing comma between spells
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Possession%20Devil,%20Greater%20(Gidim)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Possession%20Devil%2C%20Greater%20(Gidim)
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ancient%20Underworld%20Dragon
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Underworld%20Dragon
 # Trailing comma in spells
@@ -211,6 +188,8 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Scyld%20Hranni,%20Storm%20Giant%
 https://aonprd.com/NPCDisplay.aspx?ItemName=Vaultbreaker
 # Missing space after comma between fire storm and elemental body IV
 https://aonprd.com/NPCDisplay.aspx?ItemName=Rage%20Flame
+# Malformed spell-like ability block
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Kasthezvi
 # Says "DR" instead of "Immune"
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Psychic%20Stalker
 # Says "DR" instead of "Defensive Abilities"
@@ -232,12 +211,52 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Incubus
 https://aonprd.com/NPCDisplay.aspx?ItemName=Dwarven%20Rager
 # Missing end of line in Ranged Attacks (trailing or)
 https://aonprd.com/NPCDisplay.aspx?ItemName=Stage%20Magician
+# "Before Combat" and "During Combat" not bolded in the Tactics section
+https://aonprd.com/NPCDisplay.aspx?ItemName=Expert%20Blacksmith
+# "During Combat" not bolded in the Tactics section
+https://aonprd.com/NPCDisplay.aspx?ItemName=Adventuring%20Blacksmith
+https://aonprd.com/NPCDisplay.aspx?ItemName=Nimble%20Shuriken%20Thrower
+# extra close paren in Spell-Like Abilities header
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Relictner
+https://aonprd.com/NPCDisplay.aspx?ItemName=Winter%20Witch%20Baroness
+# double parens in Spell-Like Abilities header
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Tletli
+# Missing info in Spell-Like Abilities header
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Chortov
+# typo extra space in "Racial Modifiers" under Skills (and also not bolded)
+https://aonprd.com/NPCDisplay.aspx?ItemName=Android%20Impostor
+# shows up in search and the NPC table but doesn't seem to exist
+https://aonprd.com/NPCDisplay.aspx?ItemName=Harrower
+https://aonprd.com/NPCDisplay.aspx?ItemName=Sister%20of%20the%20Golden%20Erinyes
+# typo: trailing comma in Skills
+https://aonprd.com/NPCDisplay.aspx?ItemName=Cave%20Stalker
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Pleroma
+# typo space in "Inquisitor Sp ell-Like Abilities"
+https://aonprd.com/NPCDisplay.aspx?ItemName=Cannibal%20Zealot
+# the word "Bloodline" is not properly bolded
+https://aonprd.com/NPCDisplay.aspx?ItemName=Demon-Blooded%20Sorcerer
+https://aonprd.com/NPCDisplay.aspx?ItemName=Lucky%20Mage
+https://aonprd.com/NPCDisplay.aspx?ItemName=Azure%20Bolt%20Sorcerer
+# the word "Patron" is not properly bolded
+https://aonprd.com/NPCDisplay.aspx?ItemName=Winter%20Witch%20Cold%20Sister
+# says "5 resist" instead of "resist 5"
+https://aonprd.com/NPCDisplay.aspx?ItemName=Queen%20of%20Staves
+# lists a bunch of spells but doesn't have the proper header for them
+https://aonprd.com/NPCDisplay.aspx?ItemName=Technic%20League%20Captain
+# lists the Perform (wind) skill but not the bonus
+https://aonprd.com/NPCDisplay.aspx?ItemName=Beggar
+# typo, blank line in the middle of the spell like ability block
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Khala
+# typo - extra close paren in "Spell-Like Abilities (CL 8th; concentration +11))"
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Shenzuzhou
+# Missing HP
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Failed%20Prophet missing HP
+# Broken special abilities and description
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Ancient%20Edict%20Dragon
 
 
 
 # ==== TBD =====
-# Two AC lines:
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Unfettered%20Phantom
 # Melee attack special syntax
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Arcanaton
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Canopy%20Creeper
