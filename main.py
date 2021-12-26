@@ -7,19 +7,25 @@ include3_5 = True
 
 """
 TODO
-- Look over skills for problems
+- Look over skills for problems and special cases
 - Look over racial mods for problems and special cases (e.g. "(in snow)")
-- Check and fix attack parsing (e.g. damage type before slash)
 - Add splitting parentheticals to racial mods, and probably unify some stuff across skills / racial mods
-- Maybe swap to manual skill-list for racial mod parsing for cases where the skill isn't in the main skill list, e.g. "Perception relating to stonework"
-- Add comments to all uncommented broken urls
 
 Handle some special cases:
-Strange melee attacks
-- https://aonprd.com/MonsterDisplay.aspx?ItemName=Malbolgian%20Cerberi - double plus
-- https://aonprd.com/MonsterDisplay.aspx?ItemName=Arcanaton - Plus outside parens
-Strange ranged attacks
-- https://aonprd.com/MonsterDisplay.aspx?ItemName=Canopy%20Creeper - grab before plus
+- https://aonprd.com/MonsterDisplay.aspx?ItemName=Clockwork%20Assassin - unique situation where a ranged attack might deal damage or just make smoke, but my structure can't really show that. Just note it somewhere?
+- https://aonprd.com/NPCDisplay.aspx?ItemName=Criminal%20(Street%20Thug) and https://aonprd.com/NPCDisplay.aspx?ItemName=Forge%20Rider - two ended damage separated by slash
+- https://aonprd.com/NPCDisplay.aspx?ItemName=Marauder%20(Pirate%20Captain) - strange format on the two daggers
+- Melee attacks that might have issues
+	- "dazing touch +15 incorporeal touch attack"
+	- "+5"
+	- "+1"
+- Melee attack types that might have issues
+	- "/curse of lycanthropy" - https://aonprd.com/MonsterDisplay.aspx?ItemName=Wereboar%20(Hybrid%20Form)
+- Ranged attack effects that might have issues
+	- "touch 8d6 electricity" - https://aonprd.com/MonsterDisplay.aspx?ItemName=Death%20Worm%20Leviathan
+- Strange ranged attack syntax - crit range at end after a comma in parenthetical
+	- https://aonprd.com/MonsterDisplay.aspx?ItemName=Deadfall%20Tracker
+	- https://aonprd.com/MonsterDisplay.aspx?ItemName=Devotee%20of%20the%20Ravener%20King
 """
 
 
@@ -460,7 +466,7 @@ def parsePage(html, url):
 		assert isinstance(e[i], NavigableString), url
 		s = cleanS(e[i], trailingChar=',')
 		i += 1
-		result = re.search(r'^([+-]?\s*\d+)\s*(?:\((.+?)\))?\s*(?:;\s+(.+?))?$', s)
+		result = re.search(r'^([+-]?\s*\d+)\s*(?:\((.+?)\))?\s*(?:;\s+)?(.+?)?$', s)
 		assert not result is None, save + " Save Regex failed for " + url + "\tInput: |" + s + "|"
 		pageObject["saves"][save.lower()] = parseInt(result.group(1))
 		if not result.group(2) is None:
@@ -585,6 +591,7 @@ def parsePage(html, url):
 	skipBr()
 
 	# Get melee and ranged attacks if present
+	pageObject["attacks"] = {}
 	for attack_type in ["Melee", "Ranged"]:
 		if e[i].name == "b" and e[i].get_text() == attack_type:
 			i += 1
@@ -593,22 +600,24 @@ def parsePage(html, url):
 			if attack_type == "Melee" and s == "---": # Special case - no melee attack (currently only present in Lar)
 				continue
 
-			key = "attacks_" + attack_type.lower()
-			pageObject[key] = []
+			key = attack_type.lower()
+			pageObject["attacks"][key] = []
 
 			groups = splitP(s, sep=r'(?<=\))[;,]?\s+or\s+')
+			if url == "https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghristah": # Special case - an "or" we need to split on that we can't otherwise easily detect (can't do this everywhere because there are "or"s we shouldn't split on in some attacks)
+				groups = splitP(s, sep=r'[;,]?\s+or\s+')
 			for group in groups:
 				entries = splitP(group.strip(), sep=r'(?:, ?| and )')
 				group_list = []
 				for entry in entries:
 					entry = entry.strip()
-					attack_dict = {"text": entry}
+					attack_dict = {"text": entry, "entries": []}
 
 					# First, process the body and separate the parenthetical
-					result = re.search(r'^(\d+)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+(?:(?:melee|ranged)\s+)?(touch))?\s*(?:\(([^)]+)\))?\s*(?:\(([^)]+)\))?$', entry)
+					result = re.search(r'^(\d+(?:d\d+(?:[+-]\d+)?)?)?\s*(.+?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+(?:(?:melee|ranged)\s+)?(touch)?)?\s*(?:\(([^)]+)\)\s*(?:\(([^)]+)\)| plus (.+?))?)?$', entry)
 					assert not result is None, "Attack Regex failed for " + url + " |" + entry + "|"
 					if not result.group(1) is None:
-						attack_dict["count"] = parseInt(result.group(1))
+						attack_dict["count"] = parseInt(result.group(1), stringIfFail=True)
 					attack_dict["attack"] = result.group(2)
 					if not result.group(3) is None:
 						attack_dict["bonus"] = [parseInt(x) for x in splitP(result.group(3), sep=r'/')]
@@ -617,35 +626,97 @@ def parsePage(html, url):
 					if not result.group(6) is None:
 						attack_dict["restriction"] = result.group(6).strip()
 
+					# Helper function to parse crit block since we do it in 2 places
+					def parseCritBlock(s, pure=False):
+						crit_range = None
+						crit_multiplier = None
+						post = None
+						regex = r'^(.*?)/(?:(\d+ *- *\d+)(?:/\s*[×x] *(\d))?|[×x] *(\d)) *'
+						if not pure:
+							regex += r'(?: (?!/)(.+?))?'
+						regex += r'$'
+						result = re.search(regex, s)
+						if not result is None:
+							crit_range = result.group(2)
+							crit_multiplier = result.group(3) if not result.group(3) is None else result.group(4)
+							if not crit_multiplier is None:
+								crit_multiplier = parseInt(crit_multiplier)
+							s = result.group(1).strip()
+							if not pure and not result.group(5) is None:
+								post = result.group(5).strip()
+						return (s, crit_range, crit_multiplier, post)
+
 					# Now, process the parenthetical
 					if not result.group(5) is None:
 						p = result.group(5).strip()
-						result = re.search(r'^(\d+(?:d\d+)?\s*(?:[+-]\d+)?)?\s*(?:/(\d+\s*-\s*\d+))?\s*(?:/[×x]\s*(\d))?\s*(?:(.+?)?\s*plus\s+([^)]+?)|\s+(.+?))?(?:(?:, )?DC (\d+))?$', p)
-						if result is None:
-							attack_dict["effects"] = p
-						else:
-							if result.group(1) is None:
-								assert result.group(2) is None and result.group(3) is None and result.group(4) is None and result.group(6) is None, url
-							else:
-								attack_dict["damage"] = result.group(1)
+
+						# Handle rare syntax: a single crit block at the end after the pluses
+						# This also catches entries with no "plus" but with a crit block
+						p, common_crit_range, common_crit_multiplier, _ = parseCritBlock(p, pure=True)
+
+						separators = [r',?\s+plus', r';']
+						# Special cases where there's an "and" we shouldn't split on
+						if not url in ["https://aonprd.com/MonsterDisplay.aspx?ItemName=Anemos", "https://aonprd.com/MonsterDisplay.aspx?ItemName=Heresy%20Devil%20(Ayngavhaul)", "https://aonprd.com/MonsterDisplay.aspx?ItemName=Orynox%20Marchelin%2C%20Fire%20Giant%20King"]: 
+							separators.append(r',?\s+and')
+						# Special cases where we don't split on commas: "acid, cold, electricity, or fire damage" in Zhyen, and "push, 10 ft." in Panotti
+						if re.search(r', or |push, \d+ ft', p) is None:
+							separators.append(r',')
+						pentries = splitP(p, sep=r'(?:' + r'|'.join(separators) + r')\s+')
+
+						if not result.group(7) is None: # Special case: Arcanaton, plus outside parens
+							pentries.append(result.group(7).strip())
+
+						attack_list = []
+						for pentry in pentries:
+							pentry = pentry.strip()
+							entrydict = {}
+							attack_list.append(entrydict)
+
+							# Check if this is a damage entry
+							result = re.search(r'^((?:\d+d\d+|[\d.]+)(?: *[+-] *(?:\d+d\d+|[\d.]+))*(?: per .+?(?=/))?)(.*?)(?: *vs\. (.+?))?$', pentry) # Special cases in this regex: periods allowed in attack damage for Frost Giant Hunter, "per" syntax for Thorny, vs. see below
+							if not result is None:
+								entrydict["damage"] = result.group(1)
+								leftover = ""
 								if not result.group(2) is None:
-									attack_dict["crit_range"] = result.group(2)
-								if not result.group(3) is None:
-									attack_dict["crit_multiplier"] = parseInt(result.group(3))
-								if not result.group(4) is None or not result.group(6) is None:
-									assert result.group(4) is None or result.group(6) is None, urls # Can't have both at the same time, so make sure one is None
-									if result.group(4) is None:
-										attack_dict["damage_type"] = result.group(6)
-									else:
-										attack_dict["damage_type"] = result.group(4)
-								if not result.group(5) is None:
-									attack_dict["effects"] = result.group(5)
-								if not result.group(7) is None:
-									attack_dict["DC"] = parseInt(result.group(7))
+									leftover = result.group(2).strip()
+								if not result.group(3) is None: # Rare syntax: holy/unholy weapons that deal bonus damage against a certain alignment
+									entrydict["applies_against"] = result.group(3).strip()
+
+								# Handle crit block
+								damage_type, crit_range, crit_multiplier, post = parseCritBlock(leftover, pure=False)
+								damage_type = damage_type.strip()
+								
+								if post != None: # For e.g. Anemos, "10d6+5/19-20 electricity"
+									assert damage_type == "", url + " |" + damage_type + "|   |" + post + "|"
+									damage_type = post
+								if damage_type != "":
+									entrydict["type"] = damage_type.strip()
+								if not common_crit_range is None or not common_crit_multiplier is None: # Can't have both a pentry crit block and a common crit block
+									assert crit_range is None and crit_multiplier is None, url
+									crit_range, crit_multiplier = common_crit_range, common_crit_multiplier
+								if not crit_range is None:
+									entrydict["crit_range"] = crit_range.replace(" ", "") # Remove erroneous spaces
+								if not crit_multiplier is None:
+									entrydict["crit_multiplier"] = crit_multiplier
+								continue
+
+							# Rare syntax: reversed bleed damage, e.g. "bleed 1d4" in Wolpertinger
+							result = re.search(r'^bleed (\d+(?:d\d+)?)', pentry)
+							if not result is None:
+								entrydict["damage"] = result.group(1)
+								entrydict["type"] = "bleed"
+								continue
+
+							# Otherwise, just treat this as an attack effect and drop the whole text in unparsed
+							# We could do some DC parsing here, but the format is too inconsistent for it to be worth meddling with
+							# Plus, sometimes the DC is for the whole attack, and sometimes just for another pentry (which is hard to identify)
+							entrydict["effect"] = pentry
+
+						attack_dict["entries"].append(attack_list)
 
 					group_list.append(attack_dict)
 					
-				pageObject[key].append(group_list)
+				pageObject["attacks"][key].append(group_list)
 	
 	# Get space if present
 	if e[i].name == "b" and e[i].get_text() == "Space":
@@ -684,7 +755,7 @@ def parsePage(html, url):
 	# Get special attacks if present
 	if e[i].name == "b" and e[i].get_text() == "Special Attacks":
 		i += 1
-		pageObject["attacks_special"] = [x.strip() for x in splitP(handleAsterisk(collectText(["h3", "br"]).strip()))]
+		pageObject["attacks"]["special"] = [x.strip() for x in splitP(handleAsterisk(collectText(["h3", "br"]).strip()))]
 		skipBr(optional=True)
 
 	# Handle all spell-related blocks, including spells, spell-like abilities, and more
@@ -1258,7 +1329,7 @@ def parsePage(html, url):
 			skillNames = [name]
 			if name in ["Craft", "Knowledge", "Perform", "Profession"]:
 				if not result.group(2) is None:
-					skillNames = [name + " (" + t.strip() + ")" for t in splitP(result.group(2), sep=r"(?:, | and | plus )")] # All the strip() calls here and in the other if branch handle strange whitespace in cases like Black Magga (probably caused by \r handling)
+					skillNames = [name + " (" + t.strip() + ")" for t in splitP(result.group(2), sep=r"(?:,? and|,? plus|,) +")]
 			else:
 				assert result.group(2) is None, url + " |" + entry + "|"
 
@@ -1278,6 +1349,30 @@ def parsePage(html, url):
 			if name == "Perception":
 				perceptionRaw = entry
 
+		# Add in perception skill from Senses if not already present
+		if not "is_3.5" in pageObject:
+			if "Perception" in pageObject["skills"]:
+				if perceptionSkill != pageObject["skills"]["Perception"]["_"]:
+					if "Perception_other" in pageObject["skills"]:
+						if "Perception " + str(perceptionSkill) != parseInt(perceptionRaw, stringIfFail=True):
+							pageObject["skills"]["_Perception_mismatch"] = True
+					else:
+						pageObject["skills"]["_Perception_mismatch"] = True
+			else:
+				pageObject["skills"]["Perception"] = {"_": perceptionSkill}
+		else:
+			if "Listen" in pageObject["skills"]:
+				if not "Listen_other" in pageObject["skills"] and pageObject["skills"]["Listen"]["_"] != listenSkill:
+					pageObject["skills"]["_Listen_mismatch"] = True
+			else:
+				pageObject["skills"]["Listen"] = {"_": listenSkill}
+
+			if "Spot" in pageObject["skills"]:
+				if not "Spot_other" in pageObject["skills"] and pageObject["skills"]["Spot"]["_"] != spotSkill:
+					pageObject["skills"]["_Spot_mismatch"] = True
+			else:
+				pageObject["skills"]["Spot"] = {"_": spotSkill}
+
 		# Get racial modifiers if present
 		if s_racial is not None:
 			pageObject["skill_racial_mods"] = {}
@@ -1292,14 +1387,18 @@ def parsePage(html, url):
 					paren = result.group(3)
 					category = ""
 					
-					# Check against existing skills for e.g. "Diplomacy when influencing rats"
-					# Sort by length to test for longer ones first
-					for k in sorted(existing_skills.keys(), key=lambda s: len(s), reverse=True):
+					# Check against existing + known skills for e.g. "Diplomacy when influencing rats"
+					skills_1e = set(["Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Fly", "Handle Animal", "Heal", "Intimidation", "Linguistics", "Perception", "Ride", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Survival", "Swim", "Use Magic Device"]) # Doesn't include skills with parenthetical e.g. Craft because those are harder to handle as prefixes
+					skills_3_5 = set(["Appraise", "Balance", "Bluff", "Climb", "Concentration", "Decipher Script", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Forgery", "Gather Information", "Handle Animal", "Heal", "Hide", "Intimidate", "Jump", "Listen", "Move Silently", "Open Lock", "Ride", "Search", "Sense Motive", "Sleight Of Hand", "Speak Language", "Spellcraft", "Spot", "Survival", "Swim", "Tumble", "Use Magic Device", "Use Rope"]) # Doesn't include skills with parenthetical e.g. Craft because those are harder to handle as prefixes
+					possible_skills = (skills_3_5 if "is_3.5" in pageObject else skills_1e).union(set(existing_skills.keys()))
+					for k in sorted(possible_skills, key=lambda s: len(s), reverse=True): # Sort by length to test for longer ones first
 						result = re.search(r'^(?:(?:in|on)\s+)?' + re.escape(k) + r'(.*?)$', skill)
 						if not result is None:
 							category = result.group(1).strip()
 							skill = k
 							break
+					if s.startswith("(") and s.endswith(")"): # Unwrap parens, e.g. for "+4 Perception (listening only)" in Panotti
+						category = category[1:-1]
 					if category == "":
 						category = "_"
 
@@ -1339,30 +1438,6 @@ def parsePage(html, url):
 		# pageObject["skill_racial_mods"].update({result.group(groupSkill) + " (" + t + ")": parseInt(result.group(groupBonus)) for t in splitP(result.group(groupSkillParen), sep=r',\s+(?:and\s+)?')})
 
 		skipBr(optional=True)
-
-	# Add in perception skill from Senses if not already present
-	if not "is_3.5" in pageObject:
-		if "Perception" in pageObject["skills"]:
-			if perceptionSkill != pageObject["skills"]["Perception"]:
-				if "Perception_other" in pageObject["skills"]:
-					if "Perception " + str(perceptionSkill) != parseInt(perceptionRaw, stringIfFail=True):
-						pageObject["skills"]["_Perception_mismatch"] = True
-				else:
-					pageObject["skills"]["_Perception_mismatch"] = True
-		else:
-			pageObject["skills"]["Perception"] = perceptionSkill
-	else:
-		if "Listen" in pageObject["skills"]:
-			if not "Listen_other" in pageObject["skills"] and pageObject["skills"]["Listen"] != listenSkill:
-				pageObject["skills"]["_Listen_mismatch"] = True
-		else:
-			pageObject["skills"]["Listen"] = listenSkill
-
-		if "Spot" in pageObject["skills"]:
-			if not "Spot_other" in pageObject["skills"] and pageObject["skills"]["Spot"] != spotSkill:
-				pageObject["skills"]["_Spot_mismatch"] = True
-		else:
-			pageObject["skills"]["Spot"] = spotSkill
 
 	# Get languages if present
 	if e[i].name == "b" and e[i].get_text() == "Languages":

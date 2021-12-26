@@ -1,39 +1,38 @@
 import sys
 import json
 from copy import deepcopy
+import regex as re
 
 
 # For nice printing
+def sort_lists(item):
+	if isinstance(item, set) or isinstance(item, type({}.keys())):
+		return sorted(list(item))
+	elif isinstance(item, list):
+		try:
+			return sorted(sort_lists(i) for i in item)
+		except TypeError: # This handles cases like a list of dicts, where the dicts can't be compared against each other to sort them
+			return [sort_lists(i) for i in item]
+	elif isinstance(item, dict):
+		return {k: sort_lists(v) for k, v in item.items()}
+	else:
+		return item
+class SortedListEncoder(json.JSONEncoder):
+	def encode(self, obj):
+		return super(SortedListEncoder, self).encode(sort_lists(obj))
 def p(d):
-	def set_default(obj):
-		if isinstance(obj, set) or isinstance(obj, type({}.keys())):
-			return sorted(list(obj))
-		raise TypeError
-
-	print(json.dumps(d, indent=2, default=set_default))
+	print(json.dumps(d, indent=2, cls=SortedListEncoder))
 
 # For searching a nested dict for stuff
-def contains(d, s, caseSensitive=True):
-	if type(d) is dict:
-		return any(contains(d2, s, caseSensitive=caseSensitive) for d2 in d.values()) or any(contains(d2, s, caseSensitive=caseSensitive) for d2 in d.keys())
-	elif type(d) is list or type(d) is set:
-		return any(contains(d2, s, caseSensitive=caseSensitive) for d2 in d)
-	elif type(d) is str:
-		if not caseSensitive:
-			d = d.lower()
-		return s in d
-	else:
-		return d == s
-
-def search(d, s, caseSensitive=True):
+def search(d, s, caseSensitive=True, regex=False):
 	if type(d) is dict:
 		out = {}
 		for k, v in d.items():
-			t = search(v, s, caseSensitive=caseSensitive)
+			t = search(v, s, caseSensitive=caseSensitive, regex=regex)
 			if t:
 				out[k] = t
 				continue
-			t = search(k, s, caseSensitive=caseSensitive)
+			t = search(k, s, caseSensitive=caseSensitive, regex=regex)
 			if t:
 				out[k] = t
 				continue
@@ -42,18 +41,22 @@ def search(d, s, caseSensitive=True):
 	elif type(d) is list or type(d) is set:
 		out = []
 		for d2 in d:
-			t = search(d2, s, caseSensitive=caseSensitive)
+			t = search(d2, s, caseSensitive=caseSensitive, regex=regex)
 			if t:
 				out.append(t)
 		if len(out) > 0:
 			return out
 	elif type(d) is str:
-		d2 = d
-		if not caseSensitive:
-			d2 = d2.lower()
-			s = s.lower()
-		if s in d2:
-			return d
+		if not regex:
+			d2 = d
+			if not caseSensitive:
+				d2 = d2.lower()
+				s = s.lower()
+			if s in d2:
+				return d
+		else:
+			if re.search(s, d, (0 if caseSensitive else re.I)):
+				return d
 	else:
 		if d == s:
 			return d
