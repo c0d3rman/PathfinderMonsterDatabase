@@ -7,9 +7,9 @@ include3_5 = True
 
 """
 TODO
-- Look over skills for problems and special cases
-- Look over racial mods for problems and special cases (e.g. "(in snow)")
-- Add splitting parentheticals to racial mods, and probably unify some stuff across skills / racial mods
+- Add splitting parentheticals to racial mods
+- Unify some stuff across skills / racial mods
+	- https://aonprd.com/MonsterDisplay.aspx?ItemName=Redkind unification should improve parsing for this by removing the duplicate Stealth
 
 Handle some special cases:
 - https://aonprd.com/MonsterDisplay.aspx?ItemName=Clockwork%20Assassin - unique situation where a ranged attack might deal damage or just make smoke, but my structure can't really show that. Just note it somewhere?
@@ -26,6 +26,9 @@ Handle some special cases:
 - Strange ranged attack syntax - crit range at end after a comma in parenthetical
 	- https://aonprd.com/MonsterDisplay.aspx?ItemName=Deadfall%20Tracker
 	- https://aonprd.com/MonsterDisplay.aspx?ItemName=Devotee%20of%20the%20Ravener%20King
+- Strange racial modifier syntax (it does match with original book) - https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Gargoyle
+
+
 """
 
 
@@ -144,6 +147,12 @@ def parsePage(html, url):
 
 			i += 1
 		return text
+
+	# Helper to unwrap parens
+	def unwrapParens(s):
+		if s.startswith("(") and s.endswith(")"):
+			s = s[1:-1]
+		return s.strip()
 
 	# Helper to strip string and trailing char
 	def cleanS(s, trailingChar=";"):
@@ -337,14 +346,14 @@ def parsePage(html, url):
 	i += 1
 	s = collectText(["h3", "br"]).strip()
 	if not "is_3.5" in pageObject:
-		result = re.search(r'^(?:(.+)[;,])?\s*Perception\s+([+-]\s*\d+.*?)$', s) # Regex handles broken formatting on pages like Demonologist that use a comma instead of a semicolon. Space before Perception is variable length because of the typos in Elder Air Elemental and Scarlet Walker, and space inside number because of Mirror Serpent
+		result = re.search(r'^(?:(.+)[;,])?\s*(Perception\s+[+-]\s*\d+.*?)$', s) # Regex handles broken formatting on pages like Demonologist that use a comma instead of a semicolon. Space before Perception is variable length because of the typos in Elder Air Elemental and Scarlet Walker, and space inside number because of Mirror Serpent
 		assert not result is None, "Senses Regex failed for " + url
-		perceptionSkill = parseInt(result.group(2), stringIfFail=True) # Save perception skill to combine with skills section later
+		perceptionSkill = result.group(2) # Save perception skill to combine with skills section later
 	else:
-		result = re.search(r'^(?:(.+)[;,])?\s*Listen\s+([+-]\s*\d+),\s*Spot\s+([+-]\s*\d+)$', s)
+		result = re.search(r'^(?:(.+)[;,])?\s*(Listen\s+[+-]\s*\d+.*?),\s*(Spot\s+[+-]\s*\d+.*?)$', s)
 		assert not result is None, "Senses Regex failed for " + url
-		listenSkill = parseInt(result.group(2), stringIfFail=True)
-		spotSkill = parseInt(result.group(3), stringIfFail=True)
+		listenSkill = result.group(2)
+		spotSkill = result.group(3)
 	if result.group(1) is not None:
 		entries = splitP(result.group(1), sep=r'[,;]')
 		pageObject["senses"] = {}
@@ -416,10 +425,7 @@ def parsePage(html, url):
 		"flat_footed": parseInt(result.group(3))
 	}
 	if not result.group(5) is None:
-		s = result.group(5)
-		if s.startswith("(") and s.endswith(")"):
-			s = s[1:-1]
-		pageObject["AC"]["other"] = s.strip()
+		pageObject["AC"]["other"] = unwrapParens(result.group(5).strip())
 	if not result.group(4) is None:
 		entries = splitP(result.group(4), sep=r'[,;] ')
 		pageObject["AC"]["components"] = {}
@@ -1307,10 +1313,26 @@ def parsePage(html, url):
 
 		# Handle the skills segment
 		entries = splitP(s, sep=",")
+
+		# Add in perception/spot/listen skills from Senses
+		def handleSkillConflict(key, var):
+			skillEntries = [x for x in entries if x.startswith(key)]
+			assert len(skillEntries) <= 1, url
+			if len(skillEntries) == 1 and skillEntries[0] != var:
+				updateNestedDict(pageObject["skills"], {key: {"_mismatch": True}})
+				entries.append(var)
+			elif len(skillEntries) == 0:
+				entries.append(var)
+		if not "is_3.5" in pageObject:
+			handleSkillConflict("Perception", perceptionSkill)
+		else:
+			handleSkillConflict("Listen", listenSkill)
+			handleSkillConflict("Spot", spotSkill)
+
 		for entry in entries: # Complex ingestion process to deal with commas inside parentheses (e.g. "Knowledge (arcana, religion)")
 			entry = handleAsterisk(entry.strip())
 			result = re.search(r"^(.+?)(?: \((.+?)\))? ([+-]\d+)(?: *\(([^)]+)\))?$", entry)
-			assert not result is None, "Skills Regex failed for " + url
+			assert not result is None, "Skills Regex failed for " + url + " |" + entry + "|"
 			
 			# De-abbreviate name
 			name = result.group(1).strip()
@@ -1345,95 +1367,94 @@ def parsePage(html, url):
 					else:
 						updateNestedDict(pageObject["skills"], {skillName: {"_other": pentry} for skillName in skillNames})
 
-			# Save raw entry for perception mismatch checking later
-			if name == "Perception":
-				perceptionRaw = entry
-
-		# Add in perception skill from Senses if not already present
-		if not "is_3.5" in pageObject:
-			if "Perception" in pageObject["skills"]:
-				if perceptionSkill != pageObject["skills"]["Perception"]["_"]:
-					if "Perception_other" in pageObject["skills"]:
-						if "Perception " + str(perceptionSkill) != parseInt(perceptionRaw, stringIfFail=True):
-							pageObject["skills"]["_Perception_mismatch"] = True
-					else:
-						pageObject["skills"]["_Perception_mismatch"] = True
-			else:
-				pageObject["skills"]["Perception"] = {"_": perceptionSkill}
-		else:
-			if "Listen" in pageObject["skills"]:
-				if not "Listen_other" in pageObject["skills"] and pageObject["skills"]["Listen"]["_"] != listenSkill:
-					pageObject["skills"]["_Listen_mismatch"] = True
-			else:
-				pageObject["skills"]["Listen"] = {"_": listenSkill}
-
-			if "Spot" in pageObject["skills"]:
-				if not "Spot_other" in pageObject["skills"] and pageObject["skills"]["Spot"]["_"] != spotSkill:
-					pageObject["skills"]["_Spot_mismatch"] = True
-			else:
-				pageObject["skills"]["Spot"] = {"_": spotSkill}
-
 		# Get racial modifiers if present
 		if s_racial is not None:
-			pageObject["skill_racial_mods"] = {}
+			pageObject["skills"]["_racial_mods"] = {}
 			s = s_racial
 
 			def processRacialModEntry(entry, existing_skills):
-				# The most common format by far, e.g. "+8 Stealth (+16 in forests)"
-				result = re.search(r'^([+-]\d+)\s+(.+?)(?:\s+\(([+-]\d+\s+[^)]+?)\))?$', entry.strip())
+				# A regex for all skills
+				skills_1e = set(["Acrobatics", "Appraise", "Bluff", "Climb", r"Craft(?: \(.+?\))?", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Fly", "Handle Animal", "Heal", "Intimidation", "Intimidate", r"Knowledge(?: \(.+?\))?", "Linguistics", "Perception", r"Perform(?: \(.+?\))?", r"Profession(?: \(.+?\))?", "Ride", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Survival", "Swim", "Use Magic Device"])
+				skills_3_5 = set(["Appraise", "Balance", "Bluff", "Climb", "Concentration", r"Craft(?: \(.+?\))?", "Decipher Script", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Forgery", "Gather Information", "Handle Animal", "Heal", "Hide", "Intimidate", "Jump", r"Knowledge(?: \(.+?\))?", "Listen", "Move Silently", "Open Lock", r"Perform(?: \(.+?\))?", r"Profession(?: \(.+?\))?", "Ride", "Search", "Sense Motive", "Sleight Of Hand", "Speak Language", "Spellcraft", "Spot", "Survival", "Swim", "Tumble", "Use Magic Device", "Use Rope"])
+				skillRegex = r'(?:' + r'|'.join(sorted((skills_3_5 if "is_3.5" in pageObject else skills_1e), key=lambda s: len(s), reverse=True)) + r')' # Sort by length to test for longer ones first
+
+				entry = entry.strip()
+				
+				# Rare format, and-based e.g. "+2 Perception and +2 Stealth in dim light or darkness" or "+4 Stealth and Survival in deserts" (must be checked before the common format because that one catches these examples)
+				result = re.search(r'^([+-]\d+)\s+(' + skillRegex + r') and (?:([+-]\d+)\s+)?(' + skillRegex + r')\s+(.+?)$', entry)
+				if not result is None:
+					bonus1 = parseInt(result.group(1))
+					skill1 = result.group(2).strip()
+					if result.group(3) is None:
+						bonus2 = bonus1
+					else:
+						bonus2 = parseInt(result.group(3))
+					skill2 = result.group(4).strip()
+					category = unwrapParens(result.group(5).strip())
+					return {skill1: {category: bonus1}, skill2: {category: bonus2}} 
+
+				# The most common format by far - bonus first, e.g. "+2 Perception", "+8 Stealth (+16 in forests)", "+4 Diplomacy when influencing rats", or "+4 Stealth in dim light (–4 in bright light)"
+				result = re.search(r'^([+-]\d+)\s+(?:on )?(' + skillRegex + r')(?:(?:(?:\s+(.+?))?\s+\((?:improves to )?([+-]\d+\s+[^)]+?)\))|\s+(.+?))?$', entry) # Special case in regex: Pseudodragon (ignore "improves to")
 				if not result is None:
 					bonus = parseInt(result.group(1))
 					skill = result.group(2).strip()
-					paren = result.group(3)
-					category = ""
-					
-					# Check against existing + known skills for e.g. "Diplomacy when influencing rats"
-					skills_1e = set(["Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Fly", "Handle Animal", "Heal", "Intimidation", "Linguistics", "Perception", "Ride", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Survival", "Swim", "Use Magic Device"]) # Doesn't include skills with parenthetical e.g. Craft because those are harder to handle as prefixes
-					skills_3_5 = set(["Appraise", "Balance", "Bluff", "Climb", "Concentration", "Decipher Script", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Forgery", "Gather Information", "Handle Animal", "Heal", "Hide", "Intimidate", "Jump", "Listen", "Move Silently", "Open Lock", "Ride", "Search", "Sense Motive", "Sleight Of Hand", "Speak Language", "Spellcraft", "Spot", "Survival", "Swim", "Tumble", "Use Magic Device", "Use Rope"]) # Doesn't include skills with parenthetical e.g. Craft because those are harder to handle as prefixes
-					possible_skills = (skills_3_5 if "is_3.5" in pageObject else skills_1e).union(set(existing_skills.keys()))
-					for k in sorted(possible_skills, key=lambda s: len(s), reverse=True): # Sort by length to test for longer ones first
-						result = re.search(r'^(?:(?:in|on)\s+)?' + re.escape(k) + r'(.*?)$', skill)
-						if not result is None:
-							category = result.group(1).strip()
-							skill = k
-							break
-					if s.startswith("(") and s.endswith(")"): # Unwrap parens, e.g. for "+4 Perception (listening only)" in Panotti
-						category = category[1:-1]
-					if category == "":
+					paren = result.group(4)
+					if not result.group(3) is None:
+						category = result.group(3)
+					elif not result.group(5) is None:
+						category = result.group(5)
+					else:
 						category = "_"
+					category = unwrapParens(category.strip()) # Unwrap parens, e.g. for "+4 Perception (listening only)" in Panotti
 
 					out = {skill: {category: bonus}}
 					if not paren is None:
-						for entry in re.split(r',\s*(?=[+-]\d+)', paren):
-							result = re.search(r'^([+-]\d+)\s+(.+?)$', entry.strip())
+						for pentry in re.split(r',\s*(?=[+-]\d+)', paren.strip()):
+							result = re.search(r'^([+-]\d+)\s+(?:' + re.escape(skill) + r'\s+)?(.+?)$', pentry.strip()) # Special case in regex: Svirfneblin, strip duplicate "Stealth" from "+2 Stealth (+4 Stealth underground)"
 							out[skill][result.group(2).strip()] = parseInt(result.group(1))
 					return out
 
-				# Rare format, e.g. "Stealth +16"
-				result = re.search(r'^(.+?)\s+([+-]\d+)$', entry.strip())
+				# Rare format, reversed bonus e.g. "Stealth +16"
+				result = re.search(r'^(' + skillRegex + r')\s+([+-]\d+)$', entry)
 				if not result is None:
 					return {result.group(1).strip(): {"_": parseInt(result.group(2))}}
 
-				# Rare format, e.g. "Acrobatics (+4 when jumping)"
-				result = re.search(r'^(.+?)\s+\(([+-]\d+)\s+([^)]+?)\)$', entry.strip())
+				# Rare format, bonus inside parens e.g. "Acrobatics (+4 when jumping)"
+				result = re.search(r'^(' + skillRegex + r')\s+\(([+-]\d+)\s+([^)]+?)\)$', entry)
 				if not result is None:
 					return {result.group(1).strip(): {result.group(3).strip(): parseInt(result.group(2))}}
+
+				# Rare format, comma-separated and-based e.g. "+8 Bluff, Diplomacy, Intimidate, and Sense Motive vs. its creator" (currently only present in Tulpa and must be special-cased in the split step below)
+				result = re.search(r'^([+-]\d+)\s+((?:' + skillRegex + r', )+and ' + skillRegex + r')\s+(.+)$', entry)
+				if not result is None:
+					bonus = parseInt(result.group(1))
+					skills = splitP(result.group(2).strip(), sep=r', (?:and )?')
+					category = result.group(3).strip()
+					return {skill: {category: bonus} for skill in skills}
+
+				# Rare format, e.g. "+8 on vision-based Perception checks"
+				result = re.search(r'^([+-]\d+) (on .+?) (' + skillRegex + r') checks$', entry)
+				if not result is None:
+					bonus = parseInt(result.group(1))
+					skill = result.group(3).strip()
+					return {skill: {result.group(2).strip() + " checks": bonus}}
 
 				return None
 
 			entries = splitP(s)
-			while len(entries) > 0:
-				entry = entries.pop(0)
-				while len(entries) > 0 and processRacialModEntry(entries[0], pageObject["skills"]) is None:
-					entry += ", " + entries.pop(0)
+			# Special case: racial mods containing commas we shouldn't split on
+			if url in ["https://aonprd.com/MonsterDisplay.aspx?ItemName=Cloaker", "https://aonprd.com/MonsterDisplay.aspx?ItemName=Tulpa"]:
+				entries = [s]
+			for entry in entries:
+				entry = entry.strip()
 
 				result = processRacialModEntry(entry, pageObject["skills"])
 				if result is None:
-					assert not "_other" in pageObject["skill_racial_mods"], url
-					pageObject["skill_racial_mods"]["_other"] = entry
+					assert not "_other" in pageObject["skills"]["_racial_mods"], url
+					pageObject["skills"]["_racial_mods"]["_other"] = entry
 					continue
 
-				updateNestedDict(pageObject["skill_racial_mods"], result)
+				updateNestedDict(pageObject["skills"]["_racial_mods"], result)
 
 		# pageObject["skill_racial_mods"].update({result.group(groupSkill) + " (" + t + ")": parseInt(result.group(groupBonus)) for t in splitP(result.group(groupSkillParen), sep=r',\s+(?:and\s+)?')})
 
@@ -1623,6 +1644,9 @@ if __name__ == "__main__":
 		# Skip urls pre-marked as broken
 		if url in broken_urls:
 			continue
+
+		# if url != "https://aonprd.com/MonsterDisplay.aspx?ItemName=Tulpa":
+		# 	continue
 
 		with open(os.path.join(datapath, str(i) + ".html")) as file:
 			html = file.read()

@@ -2,6 +2,7 @@ import sys
 import json
 from copy import deepcopy
 import regex as re
+from pprint import pprint # Alternative printing option that sorts dicts
 
 
 # For nice printing

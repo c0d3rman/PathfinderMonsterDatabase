@@ -25,6 +25,7 @@ https://aonprd.com/NPCDisplay.aspx?ItemName=Tribe%20(Chieftain)
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Lotus%20Tree
 # Aura appears twice
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Hoary%20Muntjac
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Nikaramsa
 # Reach typo
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Xenarth
 # Says Reach twice
@@ -275,6 +276,10 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Putrid%20Ooze
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Voice%20of%20the%20Damned
 # Typo: "Bloodline Sxpell-Like Abilities (CL 7th; concentration +17)"
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Kaltestrua%2C%20Governess%20of%20Casnoriva
+# Rrrant space in "Senses darkvision 60 ft., low-light vision; Perception + 8"
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Mirror%20Serpent
+# Trailing comma in Senses block
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Succubus
 
 
 
