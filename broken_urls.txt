@@ -5,6 +5,10 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Flaming%20Skull
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Formless%20Spawn
 # Missing comma between melee attacks
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Shantak
+# lists the Perform (wind) skill but not the bonus
+https://aonprd.com/NPCDisplay.aspx?ItemName=Beggar
+# says "5 resist" instead of "resist 5"
+https://aonprd.com/NPCDisplay.aspx?ItemName=Queen%20of%20Staves
 
 
 # ==== REPORTED ISSUES ====
@@ -167,8 +171,6 @@ https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Kortash%20Khain
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Forge%20Spurned
 # Missing e in "Knowledg" in skills
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Nimbral%20Child
-# Missing comma in skills
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Demilich
 # Special Attacks not bolded and not on new line
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghoul%20Commander
 # Missing space after "or" in Attacks
@@ -280,11 +282,12 @@ https://aonprd.com/MonsterDisplay.aspx?ItemName=Kaltestrua%2C%20Governess%20of%2
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Mirror%20Serpent
 # Trailing comma in Senses block
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Succubus
-
-
-
-# ==== TBD =====
-# says "5 resist" instead of "resist 5"
-https://aonprd.com/NPCDisplay.aspx?ItemName=Queen%20of%20Staves
-# lists the Perform (wind) skill but not the bonus
-https://aonprd.com/NPCDisplay.aspx?ItemName=Beggar
+# Says "Skills" twice
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Mapinguari
+# Missing comma in skills
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Demilich
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Cyclops
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Tenebrous%20Worm
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Inkanyamba
+# Comma in wrong place in skills right after Stealth (should be after the parens)
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Grippli
