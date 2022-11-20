@@ -48,7 +48,7 @@ if __name__ == "__main__":
 			print(type(e).__name__ + ": " + str(e))
 		tSpent = time.time() - t
 
-		with open(os.path.join(outdir, str(i) + '.html'), 'w') as fp:
+		with open(os.path.join(outdir, str(i) + '.html'), 'w', encoding='utf-8') as fp:
 			fp.write(html)
 
 		# Avoid getting rate limited
