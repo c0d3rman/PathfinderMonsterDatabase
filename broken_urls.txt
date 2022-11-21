@@ -1,293 +1,34 @@
-# ==== SOURCE MATERIAL ISSUES ====
-# Missing slam attack bonus
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Flaming%20Skull
-# Trailing comma
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Formless%20Spawn
-# Missing comma between melee attacks
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Shantak
-# lists the Perform (wind) skill but not the bonus
-https://aonprd.com/NPCDisplay.aspx?ItemName=Beggar
-# says "5 resist" instead of "resist 5"
-https://aonprd.com/NPCDisplay.aspx?ItemName=Queen%20of%20Staves
-
-
 # ==== REPORTED ISSUES ====
-# Melee attack errors
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Draugr
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Decapus
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Crone%20Queen
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Paracletus
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cambion
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Urdefhan
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Seraptis
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Purrodaemon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Pazuzu
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Moloch
-https://aonprd.com/NPCDisplay.aspx?ItemName=Courtesan
-https://aonprd.com/NPCDisplay.aspx?ItemName=Tribe%20(Chieftain)
-# extraneous period at the end of the psychic magic section
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Lotus%20Tree
-# Aura appears twice
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Hoary%20Muntjac
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Nikaramsa
-# Reach typo
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Xenarth
-# Says Reach twice
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Blood%20Lily
-# AC has erroneous pluses
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Dahzagan
-# AC missing comma
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Jungle%20Drake
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Khardajeen
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Maharishi%20Manu
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Swamp%20Mummy
-# Says "AC" twice in AC block
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Paguroida
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Enisysian
-# typo in AC block - ".1" instead of "-1"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Equine%20Bone%20Golem
-# Incomplete AC line
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Fleshdreg%20Swarm
-# Errant open paren in AC line
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Enlightened%20Construct%20Clockwork%20Soldier
-# Says "AC" twice
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Living%20Doldrums
-# Broken HTML
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Rift%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Green%20Man
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ashen%20Forgemaster
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Danava
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Anunnaki
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Neh-Thalggu
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Apkallu
-https://aonprd.com/NPCDisplay.aspx?ItemName=Death%20Dealer
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Braismois
-https://aonprd.com/NPCDisplay.aspx?ItemName=Cyphermage
-https://aonprd.com/NPCDisplay.aspx?ItemName=Halfling%20Slinger
-https://aonprd.com/NPCDisplay.aspx?ItemName=Savage%20Rider
-https://aonprd.com/NPCDisplay.aspx?ItemName=Shadow%20Cleric
-https://aonprd.com/NPCDisplay.aspx?ItemName=Notorious%20Foil
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Gravesludge
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Elder%20Deep%20One
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Prydanu
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Sodden%20Drauger%20Troop
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Charon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Thriae%20Dancer
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Owb%20Prophet
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Deinochos
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Corbayrant
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Shadow%20Collector
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Emotion%20Ooze
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Mummy%20Lord
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Elder%20Wyrm
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cipactli
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Japalisura
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cultist%20Troop
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ymeri
-# Special attacks accidentally listed under Space
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Energized%20Ice%20Golem
-# Saving throw issues
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Keulia
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Frost%20Giant%20Jarl
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Frost%20Giant%20Battle%20Priest
-https://aonprd.com/NPCDisplay.aspx?ItemName=Hellknight
-https://aonprd.com/NPCDisplay.aspx?ItemName=Acid%20Terror
-# Unclosed paren in CMD
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Oronci
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Neothelid%20Overlord
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Thath-Malal%2C%20the%20Eyeless%20Prince
-# Language not properly bolded
-https://aonprd.com/MonsterDisplay.aspx?ItemName=The%20Grim%20White%20Stag
 # Racial Modifier section not properly labeled and not bolded
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Sunflower%20Leshy
-# Errant space in skills
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Poison%20Frog
-# Incomplete Skills line
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Goblin%20Commando
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Atomie
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Grootslang
 # Dead link (but appears in mythic monster list)
 https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Human%20Skeleton
-# Initiative/senses line broken in various ways
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Irii
-# Missing initiative and senses
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ogrekin
-# Missing perception from Senses block
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Whirlmaw
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Dreamthief%20Hag
-# Perception misspelled as "Pereption" in the Senses block
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Chuul%2C%20Lesser
-# Missing semicolon in senses: Senses dragon senses Perception +22
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Gold%20Dragon
-# Special Attacks repeated twice
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Dosojin
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Shadow%20Golem
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Nixudaemon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Wretchghost
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Lapsudaemon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Thunder%20Behemoth
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Thalassic%20Behemoth
-# Says "+13th" in concentration, should just be "+13"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Alp
-# Psychic Discipline not bolded
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Astomoi
-# Bloodline not bolded
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghoul%20Monarch
-# Missing comma in summon parenthetical
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Olethrodaemon
-# Blank line
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Werewasp%20(Human%20Form)
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Werewasp%20(Hybrid%20Form)
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Escorite
-# Missing newline after Psychic Spells Known
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ancient%20Occult%20Dragon
-# Unclosed paren in alignment line
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Augnagar
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Hykariut
-# Missing newlines between spell levels
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Paradise%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Skrimsl
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Nephlei
-# Missing comma between spells
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Possession%20Devil%2C%20Greater%20(Gidim)
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ancient%20Underworld%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Underworld%20Dragon
-# Trailing comma in spells
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cetaceal
-https://aonprd.com/NPCDisplay.aspx?ItemName=Vaultbreaker
-# Extra comma in spells
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Scyld%20Hranni,%20Storm%20Giant%20Matriarch
-# Missing space after comma between fire storm and elemental body IV
-https://aonprd.com/NPCDisplay.aspx?ItemName=Rage%20Flame
-# Malformed spell-like ability block
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Kasthezvi
-# Says "DR" instead of "Immune"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Psychic%20Stalker
-# Says "DR" instead of "Defensive Abilities"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Gunpowder%20Ooze
-# "Cleric Spells Prepared" not bolded
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Kortash%20Khain
-# Extraneous comma in skills: "Climb +10, (+12 ropes)"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Forge%20Spurned
-# Missing e in "Knowledg" in skills
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Nimbral%20Child
-# Special Attacks not bolded and not on new line
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ghoul%20Commander
-# Missing space after "or" in Attacks
-https://aonprd.com/NPCDisplay.aspx?ItemName=Sundering%20Axe
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Troglodyte
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Incubus
-https://aonprd.com/NPCDisplay.aspx?ItemName=Dwarven%20Rager
-# Missing end of line in Ranged Attacks (trailing or)
-https://aonprd.com/NPCDisplay.aspx?ItemName=Stage%20Magician
-# "Before Combat" and "During Combat" not bolded in the Tactics section
-https://aonprd.com/NPCDisplay.aspx?ItemName=Expert%20Blacksmith
-# "During Combat" not bolded in the Tactics section
-https://aonprd.com/NPCDisplay.aspx?ItemName=Adventuring%20Blacksmith
-https://aonprd.com/NPCDisplay.aspx?ItemName=Nimble%20Shuriken%20Thrower
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Warden%20Jack%20Swarm
 # extra parens in Spells or Spell-Like Abilities header
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Relictner
 https://aonprd.com/NPCDisplay.aspx?ItemName=Winter%20Witch%20Baroness
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Soulpierced
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tletli
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Unknown
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cervine%20Protector
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Dread%20Lord
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Shenzuzhou
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tobongo%20(Mwangi%20Treant)
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Lantern%20Archon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Implacable%20Stalker
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Preceptor%20Archon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Basavan
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Sepsidaemon
-# Missing info in Spell-Like Abilities header
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Chortov
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Shabti
-# Missing "at will" in Spell-Like Abilities
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Calaca
-# Missing "Constant-" in Spell-Like Abilities
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Barzahk
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Bibliodaemon
-# Extra space in Spell-Like Abilities (CL 5th; concentration + 7)
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tooth%20Fairy%20Monarch
-# Says "Spell-Like Abilities" twice in header
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Warmonger%20Devil%20(Levaloch)
-# Psychic Magic is mistakenly listed as Spell-Like Abilities
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Deep%20Walker
-# Trailing comma in Psychic Magic header
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Egregore
-# Missing open paren in Psychic Magic
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Nightmare%20Dragon
-# typo extra space in "Racial Modifiers" under Skills (and also not bolded)
-https://aonprd.com/NPCDisplay.aspx?ItemName=Android%20Impostor
-# shows up in search and the NPC table but doesn't seem to exist
-https://aonprd.com/NPCDisplay.aspx?ItemName=Harrower
-https://aonprd.com/NPCDisplay.aspx?ItemName=Sister%20of%20the%20Golden%20Erinyes
-# Trailing comma in Skills
-https://aonprd.com/NPCDisplay.aspx?ItemName=Cave%20Stalker
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Pleroma
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Asurendra
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Pard
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tataka
-# typo space in "Inquisitor Sp ell-Like Abilities"
-https://aonprd.com/NPCDisplay.aspx?ItemName=Cannibal%20Zealot
-# the word "Bloodline" is not properly bolded
-https://aonprd.com/NPCDisplay.aspx?ItemName=Demon-Blooded%20Sorcerer
-https://aonprd.com/NPCDisplay.aspx?ItemName=Lucky%20Mage
-https://aonprd.com/NPCDisplay.aspx?ItemName=Azure%20Bolt%20Sorcerer
-# the word "Patron" is not properly bolded
 https://aonprd.com/NPCDisplay.aspx?ItemName=Winter%20Witch%20Cold%20Sister
-# Lists a bunch of spells but doesn't have the proper header for them
+# Missing spell-like abilities header (source material has just "Spell-Like Abilities")
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Chortov
+# Broken closing <i> tag on dispel magic - `quickened <i>dispel magic<i>`
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Cultist%20Troop
+# Skills are blank, should be `Skills Bluff +25, Climb +33, Diplomacy +25, Fly –4, Intimidate +28, Knowledge (arcana) +26, Perception +25, Spellcraft +26`
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Neothelid
+# Double space in `Knowledge  (planes) +18`
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Nimbral%20Child
+# Double comma in `Space 10 ft.,, Reach 10 ft.`
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Owb%20Prophet
+# Missing space after comma in `greater teleport (self plus 50 lbs. of objects only),invisibility (self only)`
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Preceptor%20Archon
+# Malformed spell-like abilities
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Shabti
+# Missing space after comma in `discern next of kinACG (DC 18),ill omenAPG,`
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Unknown
+# Malformed html near initiative: `<b>Init</b> +21/+1<supM</sup>`
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Apkallu
+# Erroneous comma in `7th (5/day)—finger of deathM, (DC 29), power word blind`
+https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Kortash%20Khain
+# Skills are erroneously a repeat of feats. Should be: `Craft (mechanical) +15 (+19 with technology), Disable Device +15 (+19 with technology), Fly +10, Intimidate +13, Knowledge (arcana) +17, Knowledge (engineering) +23 (+27 with technology), Knowledge (geography) +17, Linguistics +8 (+12 with technology), Perception +12, Spellcraft +17`
 https://aonprd.com/NPCDisplay.aspx?ItemName=Technic%20League%20Captain
-# Blank line in the middle of the spell like ability block
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Khala
-# typo: "Spell-Like Abilities (CL 12th; concentraion +18)"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Rabisu
-# Missing HP
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Failed%20Prophet
-# Broken special abilities and description
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Young%20Edict%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ancient%20Edict%20Dragon
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Adult%20Edict%20Dragon
-# Extra newline in spells or spell-like abilities
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Fyndylsnitch%20the%20Shadowking
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Empyrean
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Glaistig
-# Missing racial modifiers
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Water%20Orm
-# Powerful Bite (Ex) should be bold
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tyrannosaurus
-# Extra comma in Racial Modifiers
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Glacier%20Toad
-# Special abilities not bolded
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Old%20Wulunga
-# Space and Special Attacks should be bolded
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Prismatic%20Orrery
-# Extra space in "Climb +10, Fly –5, Perception +5, Stealth + 1;"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Venomroach
-# Broken formatting for weaknesses
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Seeded%20Lamia
-# Double semicolon in Resist
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Fulgati
-# Says "Spells Known (CL 10 ft; concentration +12)" - should be th, not ft , and there should be no space after the 10
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Zalyakavat
-# Double comma in ability scores
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Putrid%20Ooze
-# Typo: "NE Laege outsider (evil, native)"
+# Broken HTML - says `and <i.major creation</i> at will as spell-like abilities`
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Ymeri
+# "At will" erroneously italicized
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Voice%20of%20the%20Damned
-# Typo: "Bloodline Sxpell-Like Abilities (CL 7th; concentration +17)"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Kaltestrua%2C%20Governess%20of%20Casnoriva
-# Rrrant space in "Senses darkvision 60 ft., low-light vision; Perception + 8"
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Mirror%20Serpent
-# Trailing comma in Senses block
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Succubus
-# Says "Skills" twice
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Mapinguari
-# Missing comma in skills
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Demilich
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cyclops
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Tenebrous%20Worm
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Inkanyamba
-# Comma in wrong place in skills right after Stealth (should be after the parens)
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Grippli

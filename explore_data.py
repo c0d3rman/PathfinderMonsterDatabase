@@ -63,6 +63,42 @@ def search(d, s, caseSensitive=True, regex=False):
 			return d
 
 
+def join_nested_dicts_of_sets(l): # l is a list of nested dicts, where all leaves are sets
+	if len(l) == 0:
+		return {}
+	if type(l[0]) is set:
+		return set().union(*[x for x in l])
+
+	d1 = {}
+	for k in set().union(*[set(d2.keys()) for d2 in l]):
+		d1[k] = join_nested_dicts_of_sets([d2[k] for d2 in l if k in d2])
+	return d1
+
+def generate_lookups(d, url=None): # url param is for internal use and should not be set by the caller
+	if url is None: # We're at the top
+		return join_nested_dicts_of_sets([generate_lookups(v, url=k) for k, v in d.items()])
+
+	if type(d) is dict:
+		return {k: generate_lookups(v, url=url) for k, v in d.items()}
+	elif type(d) is list or type(d) is set:
+		return join_nested_dicts_of_sets([generate_lookups(x, url=url) for x in d])
+	else:
+		return {d: set([url])}
+
+def generate_main_and_counts(d1, d2):
+	assert type(d1) is dict
+
+	# Base case: dict with set values
+	if type(d1[list(d1.keys())[0]]) is set: # Assume d1 and d2 synced
+		return True
+
+	for k in d1:
+		if generate_main_and_counts(d1[k], d2[k]):
+			d1[k] = list(d1[k].keys())
+			d2[k] = {k2: len(v2) for k2, v2 in d2[k].items()}
+
+	return False
+
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
@@ -79,28 +115,6 @@ if __name__ == "__main__":
 	# print("Filtering 3.5 entries...", end="", flush=True)
 	# d = {k: v for k, v in d.items() if "is_3.5" not in v}
 	# print(" done")
-	
-	def join_nested_dicts_of_sets(l): # l is a list of nested dicts, where all leaves are sets
-		if len(l) == 0:
-			return {}
-		if type(l[0]) is set:
-			return set().union(*[x for x in l])
-
-		d1 = {}
-		for k in set().union(*[set(d2.keys()) for d2 in l]):
-			d1[k] = join_nested_dicts_of_sets([d2[k] for d2 in l if k in d2])
-		return d1
-
-	def generate_lookups(d, url=None): # url param is for internal use and should not be set by the caller
-		if url is None: # We're at the top
-			return join_nested_dicts_of_sets([generate_lookups(v, url=k) for k, v in d.items()])
-
-		if type(d) is dict:
-			return {k: generate_lookups(v, url=url) for k, v in d.items()}
-		elif type(d) is list or type(d) is set:
-			return join_nested_dicts_of_sets([generate_lookups(x, url=url) for x in d])
-		else:
-			return {d: set([url])}
 
 	print("Generating unique_leaves_lookup...", end="", flush=True)
 	unique_leaves_lookup = generate_lookups(d)
@@ -111,19 +125,6 @@ if __name__ == "__main__":
 	print("Generating unique_leaves and unique_leaves_counts...", end="", flush=True)
 	unique_leaves = deepcopy(unique_leaves_lookup)
 	unique_leaves_counts = deepcopy(unique_leaves_lookup)
-	def generate_main_and_counts(d1, d2):
-		assert type(d1) is dict
-
-		# Base case: dict with set values
-		if type(d1[list(d1.keys())[0]]) is set: # Assume d1 and d2 synced
-			return True
-
-		for k in d1:
-			if generate_main_and_counts(d1[k], d2[k]):
-				d1[k] = list(d1[k].keys())
-				d2[k] = {k2: len(v2) for k2, v2 in d2[k].items()}
-
-		return False
 
 	generate_main_and_counts(unique_leaves, unique_leaves_counts)
 	print(" done")

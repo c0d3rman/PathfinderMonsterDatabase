@@ -1,3 +1,10 @@
+# TODO
+# Fix replacement skill - Know.
+# CSV gen
+# Fix reddit people's assertion error
+# Add utils to generate unique_leaves, counts, and lookup for a sub-dict of d in interactive mode
+
+
 #####################
 # CONFIG
 #####################
@@ -47,6 +54,7 @@ def parsePage(html, url):
 	html = re.sub(r'(?<=\s+)' + regex + r'|' + regex + r'(?=\s+)', r'', html) # First handle weird whitespace bordering regular whitespace - just delete it
 	html = re.sub(regex, r' ', html) # Then handle weird whitespace bordering non-whitespace - replace with a space
 	html = re.sub(r'(?<!<\s*br\s*>\s*)<\s*/\s*br\s*>', r'<br/>', html) # Fix broken <br> tags in some pages, e.g. Vilderavn. Uses a variable-width negative lookbehind, so we use the regex module instead of the re module
+	html = re.sub(r'<\s*/?\s*br\s*/?\s*>', r'<br/>', html) # Further fix messy <br>s, e.g. Fulgati, where <br/ > seems to cause problems
 	html = re.sub(r'[−—–‐‑‒―]|&ndash;|&mdash;', "-", html) # No reason to deal with all these different dashes
 
 	# Parse HTML into an object
@@ -392,7 +400,7 @@ def parsePage(html, url):
 	assert e[i].name == "b" and e[i].get_text() == "AC", url
 	i += 1
 	s = collectText(["br"]).strip()
-	result = re.search(r'^(-?\d+)[,;]\s+touch\s+(-?\d+)[,;]\s+flat-?footed\s+(-?\d+)(?:\s*;?\s*\((.+?)\))?(?:;?\s*(.+))?\.?$', s) # Accepts ; as well as , because of broken formatting on pages like Bugbear Lurker. Skip broken formatting trailing period in e.g. Flying Fox
+	result = re.search(r'^(-?\d+)[,;]\s+touch\s+([-+]?\d+)[,;]\s+flat-?footed\s+([-+]?\d+)(?:\s*;?\s*\((.+?)\))?(?:;?\s*(.+))?\.?$', s) # Accepts ; as well as , because of broken formatting on pages like Bugbear Lurker. Skip broken formatting trailing period in e.g. Flying Fox
 	assert not result is None, "AC Regex failed for " + url
 	pageObject["AC"] = {
 		"AC": parseInt(result.group(1)),
@@ -503,6 +511,10 @@ def parsePage(html, url):
 		if not result is None:
 			pageObject["resistances"]["_ability"] = result.group(2).strip()
 			s = result.group(1).strip()
+		
+		# Special case: Queen of Staves, says "Resist 5 fire" instead of "Resist fire 5"
+		if url == "https://aonprd.com/NPCDisplay.aspx?ItemName=Queen%20of%20Staves":
+			s = "fire 5"
 
 		entries = splitP(s, sep=r'(?:,?\s+and\s+|,)')
 		for entry in entries:
@@ -580,6 +592,9 @@ def parsePage(html, url):
 
 			if attack_type == "Melee" and s == "---": # Special case - no melee attack (currently only present in Lar)
 				continue
+
+			if attack_type == "Melee" and url == "https://aonprd.com/MonsterDisplay.aspx?ItemName=Formless%20Spawn": # Special case: Formless Spawn, trailing comma in melee attack
+				s = re.sub(r",$", "", s)
 
 			key = attack_type.lower()
 			pageObject["attacks"][key] = []
@@ -1051,6 +1066,12 @@ def parsePage(html, url):
 				i += 1
 				sourcedict["bloodline"] = handleAsterisk(cleanS(collectText(["br", "b", "h3"])).lower()) # collectText in case of superscripts / italics, e.g. Kobold Guilecaster. cleanS because there might be a semicolon like in Kortash Khain
 				skipBr(optional=True)
+			
+			# Get inquisition if present
+			if e[i].name == "b" and e[i].get_text().strip() == "Inquisition":
+				i += 1
+				sourcedict["inquisition"] = handleAsterisk(cleanS(collectText(["br", "b", "h3"])).lower()) # collectText in case of superscripts / italics, e.g. Cannibal Zealot.
+				skipBr(optional=True)
 
 			# Skip "M for mythic spell" chunk if present
 			if e[i].name == "b" and e[i].get_text().strip() == "M":
@@ -1352,6 +1373,10 @@ def parsePage(html, url):
 			
 			# This function is used to be able to use returns to end processing early, without having to actually return yet
 			def _container():
+				# Special case: Beggar, skill with no bonus
+				if url == "https://aonprd.com/NPCDisplay.aspx?ItemName=Beggar" and entry == "Perform (wind)":
+					return {entry: {"_": None}}
+
 				# The only allowed format for skills and a rare format for racial mods, e.g. "Acrobatics +13 (+17 when jumping)"
 				result = re.search(r'^(' + skillRegex + r')\s+([+-]\d+)(?:\s+\((.+?)\))?$', entry)
 				if t == "skill":
@@ -1459,8 +1484,9 @@ def parsePage(html, url):
 					# Split parenthetical skills like Craft (armorsmithing, blacksmithing, and weaponsmithing)
 					result = re.search(r'^(.+?) \((.+?)\)$', skillName)
 					if not result is None:
-						updateNestedDict(out, {result.group(1) + " (" + t.strip() + ")": deepcopy(out[skillName]) for t in splitP(result.group(2), sep=r"(?:,? and|,? plus|,) +")})
+						updateDict = {result.group(1) + " (" + t.strip() + ")": deepcopy(out[skillName]) for t in splitP(result.group(2), sep=r"(?:,? and|,? plus|,) +")}
 						del out[skillName]
+						updateNestedDict(out, updateDict)
 
 			return out
 
@@ -1692,7 +1718,7 @@ if __name__ == "__main__":
 		if url in broken_urls:
 			continue
 
-		with open(os.path.join(datapath, str(i) + ".html")) as file:
+		with open(os.path.join(datapath, str(i) + ".html"), encoding='utf-8') as file:
 			html = file.read()
 
 		try:
@@ -1703,8 +1729,8 @@ if __name__ == "__main__":
 			traceback.print_tb(tb)
 			print(type(e).__name__ + ": " + str(e))
 
-		if not include3_5 and url in pageObject:
-			del pageObject[url]
+		if not include3_5 and "is_3.5" in pageObjects[url]:
+			del pageObjects[url]
 
 	with open(os.path.join(datapath, 'data.json'), 'w') as fp:
 		json.dump(pageObjects, fp)
