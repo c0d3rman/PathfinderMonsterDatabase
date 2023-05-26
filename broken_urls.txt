@@ -1,34 +1,9 @@
 # ==== REPORTED ISSUES ====
-# Racial Modifier section not properly labeled and not bolded
+# Racial Modifier section has a weirdo "Racial Bonus" with no semicolon in the source material. But it's not properly bolded on aonprd
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Sunflower%20Leshy
-# Dead link (but appears in mythic monster list)
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Human%20Skeleton
-# extra parens in Spells or Spell-Like Abilities header
-https://aonprd.com/NPCDisplay.aspx?ItemName=Winter%20Witch%20Baroness
-https://aonprd.com/NPCDisplay.aspx?ItemName=Winter%20Witch%20Cold%20Sister
 # Missing spell-like abilities header (source material has just "Spell-Like Abilities")
 https://aonprd.com/MonsterDisplay.aspx?ItemName=Chortov
-# Broken closing <i> tag on dispel magic - `quickened <i>dispel magic<i>`
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Cultist%20Troop
-# Skills are blank, should be `Skills Bluff +25, Climb +33, Diplomacy +25, Fly –4, Intimidate +28, Knowledge (arcana) +26, Perception +25, Spellcraft +26`
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Neothelid
-# Double space in `Knowledge  (planes) +18`
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Nimbral%20Child
-# Double comma in `Space 10 ft.,, Reach 10 ft.`
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Owb%20Prophet
-# Missing space after comma in `greater teleport (self plus 50 lbs. of objects only),invisibility (self only)`
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Preceptor%20Archon
-# Malformed spell-like abilities
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Shabti
-# Missing space after comma in `discern next of kinACG (DC 18),ill omenAPG,`
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Unknown
-# Malformed html near initiative: `<b>Init</b> +21/+1<supM</sup>`
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Apkallu
-# Erroneous comma in `7th (5/day)—finger of deathM, (DC 29), power word blind`
-https://aonprd.com/MythicMonsterDisplay.aspx?ItemName=Kortash%20Khain
-# Skills are erroneously a repeat of feats. Should be: `Craft (mechanical) +15 (+19 with technology), Disable Device +15 (+19 with technology), Fly +10, Intimidate +13, Knowledge (arcana) +17, Knowledge (engineering) +23 (+27 with technology), Knowledge (geography) +17, Linguistics +8 (+12 with technology), Perception +12, Spellcraft +17`
-https://aonprd.com/NPCDisplay.aspx?ItemName=Technic%20League%20Captain
-# Broken HTML - says `and <i.major creation</i> at will as spell-like abilities`
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Ymeri
-# "At will" erroneously italicized
-https://aonprd.com/MonsterDisplay.aspx?ItemName=Voice%20of%20the%20Damned
+# Says "archlord" instead of "arclord"
+https://aonprd.com/NPCDisplay.aspx?ItemName=Arclord%20of%20Nex
+# Missing 1 for class
+https://aonprd.com/MonsterDisplay.aspx?ItemName=Munavri
