@@ -1899,12 +1899,8 @@ if __name__ == "__main__":
             if not line.strip() == "" and not line.strip().startswith("#"):
                 broken_urls.append(line.rstrip())
 
-    # create class_hds.json if it doesn't exist
-    if os.path.exists(os.path.join(datapath, "class_hds.json")) == False:
-        print("Couldn't find existing class_hds.json, creating new one...")
-        with open(os.path.join(datapath, "class_hds.json"), 'w') as fp:
-            json.dump({}, fp)
-
+    if not os.path.exists(os.path.join(datapath, "class_hds.json")):
+        print("Run get_classes.py first.")
     with open(os.path.join(datapath, "class_hds.json")) as fp:
         class_hds = json.load(fp)
     classname_map = {name.lower(): name for name in class_hds}

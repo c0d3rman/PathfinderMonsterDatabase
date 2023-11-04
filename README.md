@@ -28,7 +28,9 @@ python download_pages.py
 This will take a bit. The script limits itself to a maximum of 5 requests a second to not overload aonprd.com, but you can adjust this number if you are still having trouble.
 You can also give additional parameters to the script if you want to pull from a different file other than `data/urls.txt`, or if you want to write the results to a folder other than `data`.
 
-3. Run `main.py` to parse the raw HTML into a database:
+3. Run `get_classes.py` to download a list of all classes, which will be used for parsing the data.
+
+4. Run `main.py` to parse the raw HTML into a database:
 
 ```
 python main.py
