@@ -362,19 +362,20 @@ def parsePage(html, url):
             class_reg_block = fr"{class_reg} (?:of [\w' -]+ )?(?:\([^)]+?\) )?\d+"
             result = re.search(fr"(?:^|\s+){class_reg_block}(?:/{class_reg_block})*$", s, re.IGNORECASE)
             assert not result is None, f'Class regex failed on "{s}" in {url}'
-            classes = s[result.start():].strip().split("/")
-            s = s[:result.start()].strip()
-            pageObject["race_class"]["class"] = []
-            for c in classes:
-                result = re.search(fr"^({class_reg}) (?:of ([\w' -]+) )?(?:\(([^)]+?)\) )?(\d+)$", c, re.IGNORECASE)
-                assert not result is None, f'Invalid class block "{c}" in {url}'
-                pageObject["race_class"]["class"].append({"name": result.group(1).strip(),
-                                                          "level": parseInt(result.group(4))})
-                if not result.group(2) is None:
-                    assert pageObject["race_class"]["class"][-1]["name"] in ["antipaladin", "cleric", "druid", "inquisitor", "paladin", "warpriest"], f"Deity ({result.group(2)}) found in illegal class ({pageObject['race_class']['class'][-1]['name']}) in {url}"
-                    pageObject["race_class"]["class"][-1]["deity"] = result.group(2).strip()
-                if not result.group(3) is None:
-                    pageObject["race_class"]["class"][-1]["archetype"] = result.group(3).strip()
+            if not result is None:
+                classes = s[result.start():].strip().split("/")
+                s = s[:result.start()].strip()
+                pageObject["race_class"]["class"] = []
+                for c in classes:
+                    result = re.search(fr"^({class_reg}) (?:of ([\w' -]+) )?(?:\(([^)]+?)\) )?(\d+)$", c, re.IGNORECASE)
+                    assert not result is None, f'Invalid class block "{c}" in {url}'
+                    pageObject["race_class"]["class"].append({"name": result.group(1).strip(),
+                                                            "level": parseInt(result.group(4))})
+                    if not result.group(2) is None:
+                        assert pageObject["race_class"]["class"][-1]["name"] in ["antipaladin", "cleric", "druid", "inquisitor", "paladin", "warpriest"], f"Deity ({result.group(2)}) found in illegal class ({pageObject['race_class']['class'][-1]['name']}) in {url}"
+                        pageObject["race_class"]["class"][-1]["deity"] = result.group(2).strip()
+                    if not result.group(3) is None:
+                        pageObject["race_class"]["class"][-1]["archetype"] = result.group(3).strip()
         # Handle race + misc. if anything remains
         if len(s) > 0:
             s = s[0].upper() + s[1:]  # Capitalize first letter (since we chop off prefixes sometimes)
