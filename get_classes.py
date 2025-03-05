@@ -25,14 +25,14 @@ if __name__ == "__main__":
     # Class list page
     html = requests.get(url_classes).text
     soup = BeautifulSoup(html, "html.parser")
-    elems = soup.select("#ctl00_MainContent_AllClassLabel a")
-    entries = [(e.get_text(), e['href'].split("=")[0] + "=" + quote(e['href'].split("=")[1], safe='/()')) for e in elems]
+    elems = soup.select("#MainContent_AllClassLabel a")
+    entries = [(e.get_text().strip(), e['href'].split("=")[0] + "=" + quote(e['href'].split("=")[1], safe='/()')) for e in elems]
 
     # Prestige class list page
     html = requests.get(url_prestige).text
     soup = BeautifulSoup(html, "html.parser")
-    elems = soup.select("#ctl00_MainContent_GridViewPrestigeClasses td:first-child a")
-    entries += [(e.get_text(), e['href'].split("=")[0] + "=" + quote(e['href'].split("=")[1], safe='/()')) for e in elems]
+    elems = soup.select("#MainContent_GridViewPrestigeClasses td:first-child a")
+    entries += [(e.get_text().strip(), e['href'].split("=")[0] + "=" + quote(e['href'].split("=")[1], safe='/()')) for e in elems]
 
     # Get hit dice from individual pages
     for name, url in tqdm(entries):
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         html = requests.get(url).text
         soup = BeautifulSoup(html, "html.parser")
         # Normal classes
-        elem = soup.select_one("#ctl00_MainContent_DataListTypes_ctl00_LabelName")
+        elem = soup.select_one("#MainContent_DataListTypes_LabelName_0")
         result = re.search(r"Hit Die: d(\d+)\.", elem.get_text())
         if not result is None:
             classes[name] = int(result.group(1))
