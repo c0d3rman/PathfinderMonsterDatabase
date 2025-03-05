@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 
 
-MAX_REQUESTS_PER_SECOND = 5
+MAX_REQUESTS_PER_SECOND = 20
 
 
 if __name__ == "__main__":
