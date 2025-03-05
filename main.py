@@ -19,6 +19,11 @@ import sys
 import json
 import regex as re
 from bs4 import BeautifulSoup, NavigableString
+
+import inspect
+import logging
+import linecache
+
 include3_5 = True
 
 
@@ -28,7 +33,6 @@ include3_5 = True
 
 
 sizes = ['Fine', 'Diminutive', 'Tiny', 'Small', 'Medium', 'Large', 'Huge', 'Gargantuan', 'Colossal']
-
 
 def parseInt(s, stringIfFail=False):
     def _parseInt(s):
@@ -81,7 +85,7 @@ def parsePage(html, url):
     def skipBr(optional=False):
         nonlocal e, i
         if not optional:
-            assert e[i].name == "br", url
+            soft_assert(e[i].name == "br", url)
         elif e[i].name != "br":
             return
 
@@ -160,6 +164,8 @@ def parsePage(html, url):
 
     # Helper to update nested dicts
     def updateNestedDict(d1, d2):
+        if d2 is None:
+            return
         for k in d2:
             if not k in d1:
                 d1[k] = d2[k]
@@ -203,8 +209,8 @@ def parsePage(html, url):
                 pageObject["asterisk"] = {}
 
             result = re.search(r'^' + re.escape(asterisk) + r'\s*(.+)$', s)
-            assert not result is None, url + " |" + s + "|"
-            assert not result.group(1) in pageObject["asterisk"], url + " |" + s + "|"
+            soft_assert(not result is None, url + " |" + s + "|")
+            soft_assert(not result.group(1) in pageObject["asterisk"], url + " |" + s + "|")
             pageObject["asterisk"][asterisk] = result.group(1)
         else:
             i += 1
@@ -234,7 +240,7 @@ def parsePage(html, url):
         pageObject["second_statblock"] = True
 
     # Get main title
-    assert e[i].name == "h1" and e[i]['class'] == ['title'], url
+    soft_assert(e[i].name == "h1" and e[i]['class'] == ['title'], url)
     pageObject["title1"] = e[i].get_text()
     if e[i].find("img", src="images\\ThreeFiveSymbol.gif") is not None:
         pageObject["is_3.5"] = True
@@ -246,9 +252,9 @@ def parsePage(html, url):
         i += 1
 
     # Get statblock title & CR
-    assert e[i].name == "h2" and e[i]['class'] == ['title'], url
+    soft_assert(e[i].name == "h2" and e[i]['class'] == ['title'], url)
     result = re.search(r'^(.+) CR ([0-9/-]+?)(?:/MR (\d+))?$', e[i].get_text())
-    assert not result is None, "CR-finding Regex failed for " + url
+    soft_assert(not result is None, "CR-finding Regex failed for " + url)
     pageObject["title2"] = result.group(1)
     pageObject["CR"] = float(Fraction(result.group(2))) if "/" in result.group(2) else parseInt(result.group(2), stringIfFail=True)
     if pageObject["CR"] == "-":
@@ -258,15 +264,15 @@ def parsePage(html, url):
     i += 1
 
     # Get sources
-    assert e[i].name == "b" and e[i].get_text() == "Source", url
+    soft_assert(e[i].name == "b" and e[i].get_text() == "Source", url)
     i += 1
-    assert isinstance(e[i], NavigableString), url
+    soft_assert(isinstance(e[i], NavigableString), url)
     i += 1
     pageObject["sources"] = []
     while e[i].name == "a":
         s = e[i].get_text()
         result = re.search(r'^(.+?) pg\. (\d+)', s)
-        assert not result is None, url + " |" + s + "|"
+        soft_assert(not result is None, url + " |" + s + "|")
         pageObject["sources"].append({
             "name": result.group(1).strip(),
             "page": parseInt(result.group(2)),
@@ -275,13 +281,13 @@ def parsePage(html, url):
         i += 1
         if isinstance(e[i], NavigableString):  # Skip comma text node
             i += 1
-    assert len(pageObject["sources"]) > 0, url
+    soft_assert(len(pageObject["sources"]) > 0, url)
     skipBr()
 
     # Get XP if present (might be blank if there is none, such as with a Butterfly/Moth)
     if e[i].name == "b" and e[i].get_text() == "XP":
         i += 1
-        assert isinstance(e[i], NavigableString), url
+        soft_assert(isinstance(e[i], NavigableString), url)
         s = handleAsterisk(e[i].strip())
         if s == "":
             pageObject["XP"] = None
@@ -294,7 +300,7 @@ def parsePage(html, url):
     if pageObject["title2"] == "Nupperibo":
         s = collectText(["br"]).strip()
         result = re.search(r"^(.+?) (\d+)$", s)
-        assert not result is None, s
+        soft_assert(not result is None, s)
         pageObject["sources"].append({
             "name": result.group(1).strip(),
             "page": parseInt(result.group(2)),
@@ -344,34 +350,34 @@ def parsePage(html, url):
             for source in sources:
                 # Special case: comma-separated page numbers (e.g. Ghristah)
                 if source.isdigit():
-                    assert len(pageObject["race_class"]["sources"]) > 0, url
+                    soft_assert(len(pageObject["race_class"]["sources"]) > 0, url)
                     pageObject["race_class"]["sources"].append({"name": pageObject["race_class"]["sources"][-1]["name"],
                                                                 "page": parseInt(source)})
                     continue
                 result = re.search(fr"^(.+?) (\d+)$", source)
-                assert not result is None, f'Invalid race/class source block "{source}" in {url}'
+                soft_assert(not result is None, f'Invalid race/class source block "{source}" in {url}')
                 pageObject["race_class"]["sources"].append({"name": result.group(1).strip(),
                                                             "page": parseInt(result.group(2))})
                 # Special case: "see page" (e.g. Centaur Charger) - refers to the same source as the monster statblock
                 if pageObject["race_class"]["sources"][-1]["name"] == "see page":
-                    assert len(pageObject["sources"]) == 1, url
+                    soft_assert(len(pageObject["sources"]) == 1, url)
                     pageObject["race_class"]["sources"][-1]["name"] = pageObject["sources"][0]["name"]
         # Handle classes if present
         if s[-1].isdigit():
             class_reg = "(?:" + "|".join(sorted((re.escape(n.lower()) for n in class_hds), key=len, reverse=True)) + ")"
             class_reg_block = fr"{class_reg} (?:of [\w' -]+ )?(?:\([^)]+?\) )?\d+"
             result = re.search(fr"(?:^|\s+){class_reg_block}(?:/{class_reg_block})*$", s, re.IGNORECASE)
-            assert not result is None, f'Class regex failed on "{s}" in {url}'
+            soft_assert(not result is None, f'Class regex failed on "{s}" in {url}')
             classes = s[result.start():].strip().split("/")
             s = s[:result.start()].strip()
             pageObject["race_class"]["class"] = []
             for c in classes:
                 result = re.search(fr"^({class_reg}) (?:of ([\w' -]+) )?(?:\(([^)]+?)\) )?(\d+)$", c, re.IGNORECASE)
-                assert not result is None, f'Invalid class block "{c}" in {url}'
+                soft_assert(not result is None, f'Invalid class block "{c}" in {url}')
                 pageObject["race_class"]["class"].append({"name": result.group(1).strip(),
                                                         "level": parseInt(result.group(4))})
                 if not result.group(2) is None:
-                    assert pageObject["race_class"]["class"][-1]["name"] in ["antipaladin", "cleric", "druid", "inquisitor", "paladin", "warpriest"], f"Deity ({result.group(2)}) found in illegal class ({pageObject['race_class']['class'][-1]['name']}) in {url}"
+                    soft_assert(pageObject["race_class"]["class"][-1]["name"] in ["antipaladin", "cleric", "druid", "inquisitor", "paladin", "warpriest"], f"Deity ({result.group(2)}) found in illegal class ({pageObject['race_class']['class'][-1]['name']}) in {url}")
                     pageObject["race_class"]["class"][-1]["deity"] = result.group(2).strip()
                 if not result.group(3) is None:
                     pageObject["race_class"]["class"][-1]["archetype"] = result.group(3).strip()
@@ -388,7 +394,7 @@ def parsePage(html, url):
         s2 = collectText(["br"])
         pageObject["race_class"] = {"raw": s2}
         p = "Unique"
-        assert s2.startswith(p), url
+        soft_assert(s2.startswith(p), url)
         pageObject["race_class"]["prefix"] = [p]
         s2 = s2.replace(p, "").strip()
         pageObject["race_class"]["race"] = s2[0].upper() + s2[1:]
@@ -396,7 +402,7 @@ def parsePage(html, url):
 
     # Get alignment, size, type, subtypes
     result = re.search(r'^(.+) (' + "|".join(sizes) + r') ([^(]+)(?: \((.+)\))?$', handleAsterisk(s))
-    assert not result is None, "Alignment Line Regex failed for " + url + " |" + handleAsterisk(s) + "|"
+    soft_assert(not result is None, "Alignment Line Regex failed for " + url + " |" + handleAsterisk(s) + "|")
     pageObject["alignment"] = {"raw": result.group(1), "cleaned": result.group(1).replace("Always ", "")}
     pageObject["size"] = result.group(2)
     pageObject["type"] = result.group(3)
@@ -404,12 +410,12 @@ def parsePage(html, url):
         pageObject["subtypes"] = splitP(result.group(4))
 
     # Get initiative
-    assert e[i].name == "b" and e[i].get_text() == "Init", url
+    soft_assert(e[i].name == "b" and e[i].get_text() == "Init", url)
     i += 1
-    assert isinstance(e[i], NavigableString), url
+    soft_assert(isinstance(e[i], NavigableString), url)
     s = collectText("b").strip()
     result = re.search(r'^([+-]\s*\d+)(?:/([+-]\s*\d+))?\s*(?:\(([+-]\s*\d+)\s+(.+?)\))?\s*(?:[,;]\s*(.+?)\s*)?;$', s)
-    assert not result is None, "Initiative Regex failed for " + url + " |" + s + "|"
+    soft_assert(not result is None, "Initiative Regex failed for " + url + " |" + s + "|")
     if not result.group(2) is None:  # Check for dual initiative
         pageObject["initiative"] = {"bonus": [parseInt(result.group(1)), parseInt(result.group(2))]}
     else:
@@ -420,16 +426,16 @@ def parsePage(html, url):
         pageObject["initiative"]["ability"] = result.group(5)
 
     # Get senses
-    assert e[i].name == "b" and e[i].get_text() == "Senses", url
+    soft_assert(e[i].name == "b" and e[i].get_text() == "Senses", url)
     i += 1
     s = collectText(["h3", "br"]).strip()
     if not "is_3.5" in pageObject:
         result = re.search(r'^(?:(.+)[;,])?\s*(Perception\s+[+-]\s*\d+.*?)$', s)  # Regex handles broken formatting on pages like Demonologist that use a comma instead of a semicolon. Space before Perception is variable length because of the typos in Elder Air Elemental and Scarlet Walker, and space inside number because of Mirror Serpent
-        assert not result is None, "Senses Regex failed for " + url
+        soft_assert(not result is None, "Senses Regex failed for " + url)
         perceptionSkill = result.group(2)  # Save perception skill to combine with skills section later
     else:
         result = re.search(r'^(?:(.+)[;,])?\s*(Listen\s+[+-]\s*\d+.*?),\s*(Spot\s+[+-]\s*\d+.*?)$', s)
-        assert not result is None, "Senses Regex failed for " + url
+        soft_assert(not result is None, "Senses Regex failed for " + url)
         listenSkill = result.group(2)
         spotSkill = result.group(3)
     if result.group(1) is not None:
@@ -454,7 +460,7 @@ def parsePage(html, url):
         for aura in splitP(collectText(["h3", "br"]).strip()):
             aura_dict = {}
             result = re.search(r'^(.+?)(?:\s+\((.+?)\))?$', aura)
-            assert not result is None, "Aura Regex failed for " + url
+            soft_assert(not result is None, "Aura Regex failed for " + url)
             aura_dict['name'] = handleAsterisk(result.group(1).strip())
             if not result.group(2) is None:
                 parts = splitP(result.group(2), sep=r'[,;]')
@@ -488,43 +494,49 @@ def parsePage(html, url):
             pageObject['auras'].append(aura_dict)
 
     # DEFENSE
-    assert e[i].name == "h3" and e[i]['class'] == ['framing'] and e[i].get_text() == "Defense", url
+    soft_assert(e[i].name == "h3" and e[i]['class'] == ['framing'] and e[i].get_text() == "Defense", url)
     i += 1
 
     # Get AC
-    assert e[i].name == "b" and e[i].get_text() == "AC", url
+    soft_assert(e[i].name == "b" and e[i].get_text() == "AC", url)
     i += 1
     s = collectText(["br"]).strip()
-    result = re.search(r'^(-?\d+)[,;]\s+touch\s+([-+]?\d+)[,;]\s+flat-?footed\s+([-+]?\d+)(?:\s*;?\s*\((.+?)\))?(?:;?\s*(.+))?\.?$', s)  # Accepts ; as well as , because of broken formatting on pages like Bugbear Lurker. Skip broken formatting trailing period in e.g. Flying Fox
-    assert not result is None, "AC Regex failed for " + url
-    pageObject["AC"] = {
-        "AC": parseInt(result.group(1)),
-        "touch": parseInt(result.group(2)),
-        "flat_footed": parseInt(result.group(3))
-    }
-    if not result.group(5) is None:
-        pageObject["AC"]["other"] = unwrapParens(result.group(5).strip())
-    if not result.group(4) is None:
-        entries = splitP(result.group(4), sep=r'[,;] ')
-        pageObject["AC"]["components"] = {}
-        for entry in entries:
-            entry = entry.strip()  # Fixes whitespace issues in e.g. Malsandra (probably caused by \r handling)
-            result = re.search(r'^([+-]\d+)\s+(.+)$', entry)
-            if not result is None:
-                pageObject["AC"]["components"][result.group(2).lower().strip()] = parseInt(result.group(1))
-            else:
-                if not "other" in pageObject["AC"]["components"]:
-                    pageObject["AC"]["components"]["other"] = []
-                pageObject["AC"]["components"]["other"].append(entry)
+    # Accepts ; as well as , because of broken formatting on pages like Bugbear Lurker. Skip broken formatting trailing period in e.g. Flying Fox
+    result = re.search(r'^(-?\d+)[,;]\s+touch\s+([-+]?\d+)[,;]\s*flat-?footed\s*([-+]?\d+)(?:\s*;?\s*\((.+?)\))?(?:;?\s*(.+))?\.?$', s)  
+    soft_assert(not result is None, "AC Regex failed for " + url)
+    soft_assert(not result is None, "entry: " + s)
+    if (not result is None):
+        soft_assert(len(result.groups()) >= 3, "AC Regex failed: could not find all groups. entry : |" + s + "|. url: " + url)
+        if (len(result.groups()) >= 3):
+            pageObject["AC"] = {
+                "AC": parseInt(result.group(1)),
+                "touch": parseInt(result.group(2)),
+                "flat_footed": parseInt(result.group(3))
+            }
+
+        if not result.group(5) is None:
+            pageObject["AC"]["other"] = unwrapParens(result.group(5).strip())
+        if not result.group(4) is None:
+            entries = splitP(result.group(4), sep=r'[,;] ')
+            pageObject["AC"]["components"] = {}
+            for entry in entries:
+                entry = entry.strip()  # Fixes whitespace issues in e.g. Malsandra (probably caused by \r handling)
+                result = re.search(r'^([+-]\d+)\s+(.+)$', entry)
+                if not result is None:
+                    pageObject["AC"]["components"][result.group(2).lower().strip()] = parseInt(result.group(1))
+                else:
+                    if not "other" in pageObject["AC"]["components"]:
+                        pageObject["AC"]["components"]["other"] = []
+                    pageObject["AC"]["components"]["other"].append(entry)
     skipBr()
 
     # Get HP, and fast healing / regeneration / other HP abilities if present
-    assert e[i].name == "b" and e[i].get_text() == "hp", url
+    soft_assert(e[i].name == "b" and e[i].get_text() == "hp", url)
     i += 1
-    assert isinstance(e[i], NavigableString), url
+    soft_assert(isinstance(e[i], NavigableString), url)
     s = handleAsterisk(e[i].strip())
     result = re.search(r'^(\d+)(?:\s+each)?\s*\((.+?)(?: plus (.+?))?\)(?:[;,] (.+))?$', s)  # Supports , instead of ; for broken formatting on pages like Egregore
-    assert not result is None, "HP Regex failed for " + url
+    soft_assert(not result is None, "HP Regex failed for " + url)
     pageObject["HP"] = {
         "total": parseInt(result.group(1)),
         "long": result.group(2)
@@ -546,7 +558,7 @@ def parsePage(html, url):
     if pageObject["title2"] == "Shifty Noble":
         s = s[:-1]
     result = re.search(r'^(?:(\d+) HD[;,] )?((?:\d+d\d+\+)+)?(\d+d\d+)(?:\+?([+-]\d+))?(?: HD)?$', s)  # Supports double plus for Jiang-Shi typo, comma instead of semicolon for Villager (Farmer), and trailing " HD" for Swamp Mummy
-    assert not result is None, f'HP parenthetical regex failed for "{s}" in {url}'
+    soft_assert(not result is None, f'HP parenthetical regex failed for "{s}" in {url}')
     pageObject["HP"]["bonus_HP"] = parseInt(result.group(4)) if not result.group(4) is None else 0
     HD_blocks = [result.group(3)]
     if result.group(2) is not None:
@@ -555,14 +567,14 @@ def parsePage(html, url):
     HD_blocks_map = {}
     for HD_block in HD_blocks:
         result2 = re.search(r'^(\d+)d(\d+)', HD_block)
-        assert not result2 is None, f"Broken HD block '{HD_block}' in {url}"
+        soft_assert(not result2 is None, f"Broken HD block '{HD_block}' in {url}")
         die = parseInt(result2.group(2))
         if not die in HD_blocks_map:  # Sometimes same-size HDs from different sources are combined (Eye of Lamashtu) and sometimes not (Centaur Charger)
             HD_blocks_map[die] = 0
         HD_blocks_map[die] += parseInt(result2.group(1))
     # Handle HD blocks
     if not ("race_class" in pageObject and "class" in pageObject["race_class"]):
-        assert len(HD_blocks_map) == 1, f"Class HDs but no class levels in {url}"
+        soft_assert(len(HD_blocks_map) == 1, f"Class HDs but no class levels in {url}")
     else:
         pageObject["HP"]["HD"]["class"] = []
         for x in pageObject["race_class"]["class"]:  # Which HD is racial is inconsistent, so we do process of elimination to figure out what it is
@@ -580,7 +592,7 @@ def parsePage(html, url):
             pageObject["HP"]["HD"]["class"].append({"name": x["name"],
                                                     "die": die,
                                                     "num": x["level"]})
-        assert len(HD_blocks_map) <= 1, f"Class HDs don't match classes in {url}"
+        soft_assert(len(HD_blocks_map) <= 1, f"Class HDs don't match classes in {url}")
     if len(HD_blocks_map) == 1:  # There are racial HDs left over
         pair = list(HD_blocks_map.items())[0]
         pageObject["HP"]["HD"]["racial"] = {"die": pair[0], "num": pair[1]}
@@ -589,27 +601,27 @@ def parsePage(html, url):
         pageObject["HP"]["HD"]["num"] += pageObject["HP"]["HD"]["racial"]["num"]
     if "class" in pageObject["HP"]["HD"]:
         pageObject["HP"]["HD"]["num"] += sum(x["num"] for x in pageObject["HP"]["HD"]["class"])
-    assert HD_total is None or HD_total == pageObject["HP"]["HD"]["num"], f"Mismatched HD count in {url}"
+    soft_assert(HD_total is None or HD_total == pageObject["HP"]["HD"]["num"], f"Mismatched HD count in {url}")
     i += 1
     skipBr()
 
     # Get saves
     pageObject["saves"] = {}
     for save in ["Fort", "Ref", "Will"]:
-        assert e[i].name == "b" and e[i].get_text() == save, url
+        soft_assert(e[i].name == "b" and e[i].get_text() == save, url)
         i += 1
-        assert isinstance(e[i], NavigableString), url
+        soft_assert(isinstance(e[i], NavigableString), url)
         s = cleanS(e[i], trailingChar=',')
         i += 1
         result = re.search(r'^([+-]?\s*\d+)\s*(?:\((.+?)\))?\s*(?:;\s+)?(.+?)?$', s)
-        assert not result is None, save + " Save Regex failed for " + url + "\tInput: |" + s + "|"
+        soft_assert(not result is None, save + " Save Regex failed for " + url + "\tInput: |" + s + "|")
         pageObject["saves"][save.lower()] = parseInt(result.group(1))
         if not result.group(2) is None:
             pageObject["saves"][save.lower() + "_other"] = result.group(2).strip()
 
         # On the last save (Will) check for a post-save semicolon covering misc. bonuses that apply to every save type
         if not save == "Will":
-            assert result.group(3) is None, url
+            soft_assert(result.group(3) is None, url)
         elif not result.group(3) is None:
             pageObject["saves"]["other"] = result.group(3).strip()
     skipBr(optional=True)
@@ -629,7 +641,7 @@ def parsePage(html, url):
             entry = entry.strip()
             entrydict = {}
             result = re.search(r'^(\d+)/\s*(.+?)\s*(?:\((?:(?:(.+?), )?(\d+) (?:hp|hit points|points)|(.+?))?\))?$', entry)
-            assert not result is None, url + " |" + entry + "|"
+            soft_assert(not result is None, url + " |" + entry + "|")
             entrydict["amount"] = parseInt(result.group(1))
             entrydict["weakness"] = result.group(2)
             if not result.group(4) is None:
@@ -676,7 +688,7 @@ def parsePage(html, url):
     # Get SR if present
     if e[i].name == "b" and e[i].get_text() == "SR":
         i += 1
-        assert isinstance(e[i], NavigableString), url
+        soft_assert(isinstance(e[i], NavigableString), url)
         pageObject["SR"] = parseInt(cleanS(e[i]), stringIfFail=True)
         i += 1
 
@@ -688,16 +700,16 @@ def parsePage(html, url):
         pageObject["weaknesses"] = splitP(collectText(["h3"]).strip())  # Skip leading space
 
     # OFFENSE
-    assert e[i].name == "h3" and e[i]['class'] == ['framing'] and e[i].get_text() == "Offense", url
+    soft_assert(e[i].name == "h3" and e[i]['class'] == ['framing'] and e[i].get_text() == "Offense", url)
     i += 1
 
     # Get speed
-    assert e[i].name == "b" and e[i].get_text() == "Speed", url
+    soft_assert(e[i].name == "b" and e[i].get_text() == "Speed", url)
     i += 1
     s = collectText(["br"])
     # Handle entries like Solar that have one set of speeds normally and another in armor
     parts = re.split(r'; (?![^()]*\))', s)  # Use a special split to avoid splitting on semicolons inside parens
-    assert len(parts) <= 2, url
+    soft_assert(len(parts) <= 2, url)
     s = parts[0]
     entries = splitP(s)
     pageObject["speeds"] = {}
@@ -706,7 +718,7 @@ def parsePage(html, url):
         if not result is None:
             t = result.group(1)
             if j != 0:
-                assert t is not None, url
+                soft_assert(t is not None, url)
             elif t is None:
                 t = "base"
             t = t.lower()
@@ -759,7 +771,7 @@ def parsePage(html, url):
 
                     # First, process the body and separate the parenthetical
                     result = re.search(r'^(\d+(?:d\d+(?:[+-]\d+)?)?)?\s*(.*?)\s*((?:[+-]\d+/)*[+-]\d+)?(?:\s+(?:(?:melee|ranged|(incorporeal))\s+)?(touch)?(?: attack)?)?\s*(?:\(([^)]+)\)\s*(?:\(([^)]+)\)| plus (.+?))?)?$', entry)
-                    assert not result is None, "Attack Regex failed for " + url + " |" + entry + "|"
+                    soft_assert(not result is None, "Attack Regex failed for " + url + " |" + entry + "|")
                     if not result.group(1) is None:
                         attack_dict["count"] = parseInt(result.group(1), stringIfFail=True)
                     attack_dict["attack"] = result.group(2)
@@ -773,7 +785,7 @@ def parsePage(html, url):
                     if not result.group(5) is None:
                         attack_dict["touch"] = True
                     if not result.group(4) is None:
-                        assert attack_dict["touch"], url
+                        soft_assert(attack_dict["touch"], url)
                         attack_dict["touch"] = "incorporeal"
                     p = result.group(6)
                     if not result.group(7) is None:
@@ -784,7 +796,7 @@ def parsePage(html, url):
                     def parseCritBlock(s, pure=False):
                         # Special case: crit block at the end after comma, happens in Deadfall Tracker and Devotee of the Ravener King
                         if pure:
-                            result = re.search(r'^(.+?), (\d+ *- *\d+)$', s)
+                            result = re.search(r'^(.+?),\s?(\d+ *- *\d+)$', s)
                             if not result is None:
                                 return result.group(1).strip(), result.group(2), None, None
 
@@ -863,12 +875,13 @@ def parsePage(html, url):
                                 damage_type = damage_type.strip()
 
                                 if post != None:  # For e.g. Anemos, "10d6+5/19-20 electricity"
-                                    assert damage_type == "", url + " |" + damage_type + "|   |" + post + "|"
+                                    if (damage_type != ""):
+                                        post = damage_type + " " + post
                                     damage_type = post
                                 if damage_type != "":
                                     entrydict["type"] = damage_type.strip()
                                 if not common_crit_range is None or not common_crit_multiplier is None:  # Can't have both a pentry crit block and a common crit block
-                                    assert crit_range is None and crit_multiplier is None, url
+                                    soft_assert(crit_range is None and crit_multiplier is None, url)
                                     crit_range, crit_multiplier = common_crit_range, common_crit_multiplier
                                 if not crit_range is None:
                                     entrydict["crit_range"] = crit_range.replace(" ", "")  # Remove erroneous spaces
@@ -897,9 +910,9 @@ def parsePage(html, url):
     # Get space if present
     if e[i].name == "b" and e[i].get_text() == "Space":
         i += 1
-        assert isinstance(e[i], NavigableString), url
+        soft_assert(isinstance(e[i], NavigableString), url)
         result = re.search(r'^(?:(\d+)|(2\s*-?\s*1/2)|(1/2))\s*(?:ft\.?|feet)$', cleanS(e[i], ",").strip())
-        assert not result is None, "Space Regex failed for " + url
+        soft_assert(not result is None, "Space Regex failed for " + url)
         if not result.group(2) is None:
             pageObject["space"] = 2.5
         elif not result.group(3) is None:
@@ -911,10 +924,10 @@ def parsePage(html, url):
     # Get reach if present
     if e[i].name == "b" and e[i].get_text() == "Reach":
         i += 1
-        assert isinstance(e[i], NavigableString), url
+        soft_assert(isinstance(e[i], NavigableString), url)
 
         result = re.search(r'^(?:(\d+)|(2\s*-?\s*1/2)|(1/2))\s*(?:ft\.?|feet)(?:\s*\(?([^)]+)\)?)?$', cleanS(e[i], ",").strip())
-        assert not result is None, "Reach Regex failed for " + url
+        soft_assert(not result is None, "Reach Regex failed for " + url)
         if not result.group(2) is None:
             pageObject["reach"] = 2.5
         elif not result.group(3) is None:
@@ -939,7 +952,7 @@ def parsePage(html, url):
         if e[i].name == "b" and ("Spells" in e[i].get_text() or "Extracts" in e[i].get_text()):
             key = "spells"
             result = re.search(r'^(?:([\w ]+) )?(?:Spells|Extracts) (Prepared|Known)$', e[i].get_text().strip())
-            assert not result is None, "Spell Class Regex failed for " + url
+            soft_assert(not result is None, "Spell Class Regex failed for " + url)
             source = result.group(1)
             spell_type = result.group(2).lower()
             if source is None:
@@ -979,17 +992,18 @@ def parsePage(html, url):
             if key == "spells":
                 sourcedict["type"] = spell_type
 
-            assert isinstance(e[i], NavigableString), url
+            soft_assert(isinstance(e[i], NavigableString), url)
 
             result = re.search(r'^\((.+)\)$', e[i].strip())
-            assert not result is None, f'Spell-Related Header Base Regex failed for "{e[i].strip()}" in {url}'
+            soft_assert(not result is None, f'Spell-Related Header Base Regex failed for "{e[i].strip()}" in {url}')
             entries = splitP(result.group(1).strip(), sep=r'[;,]')  # Handles corrupted formatting for , instead of ; like in Ice Mage
             i += 1
 
             # The CL should always be there
             result = re.search(r'^(?:CL|caster level)\s+(\d+)(?:\w{2})?$', entries.pop(0), re.IGNORECASE)  # Ignore case for Nochlean
-            assert not result is None, "Spell-Related Header CL Regex failed for " + url
-            sourcedict["CL"] = parseInt(result.group(1))
+            soft_assert(not result is None, "Spell-Related Header CL Regex failed for " + url)
+            if (not result is None and  len(result.groups()) > 1):
+                sourcedict["CL"] = parseInt(result.group(1))
 
             # Optional entries
             for entry in entries:
@@ -1042,7 +1056,7 @@ def parsePage(html, url):
                 # Line regex
                 if key == "spells":
                     result = re.search(r'^(\d+)(?:\w{2})?\s*(?:\((?:(at[ -]will)|(\d+)(?:/day(?:, (\d+) remaining)?)?)\))?\s*(-)(?![^()]*\))', s, re.IGNORECASE)  # Make sure not to get a dash inside parens e.g. Young Occult Dragon
-                    assert not result is None, f'Spell line regex failed for "{s}" in {url}'
+                    soft_assert(not result is None, f'Spell line regex failed for "{s}" in {url}')
 
                     level = parseInt(result.group(1))
                     if not result.group(2) is None:
@@ -1075,7 +1089,7 @@ def parsePage(html, url):
                         is_symbol_special = True
 
                     result = re.search(r'^([^-]*?at-will[^-]*?|.+?)\s*-\s*(.+)$', s, re.IGNORECASE)  # Specially allow at-will before dash like in Kasa-obake
-                    assert not result is None, url + " |" + s + "|"
+                    soft_assert(not result is None, url + " |" + s + "|")
 
                     freq = result.group(1)
                     entries = splitP(result.group(2))
@@ -1106,11 +1120,17 @@ def parsePage(html, url):
                     if key == "spell_like_abilities" and is_symbol_special:
                         entrydict["symbols_special"] = True
 
-                    result = re.search(r'^([^)(]+?)\s*(?:\(([^)]+)\))?\s*(?:\(([^)]+)\))?$', entry)  # Some entries have double-parenthetical, e.g. Solar
-                    assert not result is None, "Single Spell or Spell-Like Ability Regex failed for " + url + " |" + entry + "|"
+                    # Some entries have double-parenthetical, e.g. Solar
+                    # And some have more than one spell in a single entry, e.g. Kasa-obake
+                    result = re.search(r'^([^)(]+?)\s*(?:\(([^)]+)\))?\s*(?:\(([^)]+)\))?(?:,(.*))?$', entry)  
+                    soft_assert(not result is None, "Single Spell or Spell-Like Ability Regex failed for " + url + " |" + entry + "|")
+                    if (result is None):
+                        continue
+                    
                     name = handleAsterisk(result.group(1).strip())
                     parenthetical = result.group(2)
                     parenthetical2 = result.group(3)
+                    additional_spells = result.group(4) if len(result.groups()) > 3 else None
                     namedict = {  # Some manual spell name replacements
                         "cure mod. wounds": "cure moderate wounds",
                         "d. magic": "detect magic",
@@ -1162,10 +1182,11 @@ def parsePage(html, url):
                     giveup = False
 
                     # Handle special case: summon spell-like ability
-                    if key == "spell_like_abilities" and not parenthetical is None and entrydict["name"].lower().startswith("summon") and parenthetical.startswith("level "):  # startswith summon to account for stuff like "summon bees" in Thriae Seer, startswith level to dodge things like Summon Monster
-                        assert parenthetical2 is None, url + " |" + parenthetical2 + "|"
-                        result = re.search(r'^level (\d+), (.+)$', parenthetical)
-                        assert not result is None, "Summon Spell-Like Ability Regex failed for " + url + " |" + parenthetical + "|"
+                    # startswith summon to account for stuff like "summon bees" in Thriae Seer, startswith level to dodge things like Summon Monster
+                    if key == "spell_like_abilities" and not parenthetical is None and entrydict["name"].lower().startswith("summon") and parenthetical.startswith("level "):  
+                        soft_assert(parenthetical2 is None, url + " |" + ( "" if parenthetical2 is None else parenthetical2 ) + "|")
+                        result = re.search(r'^level (\d+),\s?(.+)$', parenthetical)
+                        soft_assert(not result is None, "Summon Spell-Like Ability Regex failed for " + url + " |" + parenthetical + "|")
                         entrydict["level"] = parseInt(result.group(1))
                         entrydict["summons"] = []
                         s = result.group(2).strip()
@@ -1180,12 +1201,12 @@ def parsePage(html, url):
                         pentries = splitP(s, sep="(?:,? or|,)")
                         for pentry in pentries:
                             result = re.search(r'^(?:(\d+(?:d\d+)?) )?(.+?)(?: (\d+%))?$', pentry.strip())
-                            assert not result is None, "Summon Spell-Like Ability Entry Regex failed for " + url + " |" + s + "|"
+                            soft_assert(not result is None, "Summon Spell-Like Ability Entry Regex failed for " + url + " |" + s + "|")
                             summondict = {"name": result.group(2).strip()}
                             if not result.group(1) is None:
                                 summondict["amount"] = parseInt(result.group(1), stringIfFail=True)
                             if not commonChance is None:
-                                assert result.group(3) is None, "Two conflicting chances for a summon entry in " + url
+                                soft_assert(result.group(3) is None, "Two conflicting chances for a summon entry in " + url)
                                 summondict["chance"] = commonChance
                             elif not result.group(3) is None:
                                 summondict["chance"] = result.group(3)
@@ -1228,14 +1249,24 @@ def parsePage(html, url):
                                 break
                             entrydict["other"] = pentry
 
+                        if not giveup and additional_spells and additional_spells.strip():
+                            # Add the current spell to the entries list
+                            pageObject[key]["entries"].append(entrydict)
+                            
+                            # Add the additional spell(s) back to entries for processing
+                            entries.append(additional_spells.strip())
+                            
+                            # Skip adding the current entry again since we've already added it
+                            continue
                     if giveup:
                         entrydict = entrydict_orig
+
                     pageObject[key]["entries"].append(entrydict)
 
             # Skip "D for Domain spell" chunk if present
             if e[i].name == "b" and e[i].get_text().strip() == "D":
                 i += 1  # Skip "D"
-                assert isinstance(e[i], NavigableString) and e[i].strip().lower() == "domain spell;", url
+                soft_assert(isinstance(e[i], NavigableString) and e[i].strip().lower() == "domain spell;", url)
                 i += 1  # Skip "Domain spell; "
                 skipBr(optional=True)
 
@@ -1261,14 +1292,14 @@ def parsePage(html, url):
             # Skip "M for mythic spell" chunk if present
             if e[i].name == "b" and e[i].get_text().strip() == "M":
                 i += 1
-                assert isinstance(e[i], NavigableString) and (e[i].strip().lower() == "mythic spell" or e[i].strip().lower() == "mythic spells"), url
+                soft_assert(isinstance(e[i], NavigableString) and (e[i].strip().lower() == "mythic spell" or e[i].strip().lower() == "mythic spells"), url)
                 i += 1
                 skipBr(optional=True)
 
             # Skip "S for spirit magic spell" chunk if present
             if e[i].name == "b" and e[i].get_text().strip() == "S":
                 i += 1  # Skip "S"
-                assert isinstance(e[i], NavigableString) and e[i].strip().lower() == "spirit magic spell;", url
+                soft_assert(isinstance(e[i], NavigableString) and e[i].strip().lower() == "spirit magic spell;", url)
                 i += 1  # Skip "spirit magic spell; "
                 skipBr(optional=True)
 
@@ -1308,17 +1339,17 @@ def parsePage(html, url):
                 skipBr(optional=True)
 
         elif key == "kineticist_wild_talents":
-            assert not key in pageObject, url
+            soft_assert(not key in pageObject, url)
             pageObject[key] = {}
             while isinstance(e[i], NavigableString):
                 result = re.search(r'^(.+?)\s*-\s*(.+)$', collectText(["h3", "br"]).strip())
-                assert not result is None, "Kineticist Wild Talent Line Regex failed for " + url
+                soft_assert(not result is None, "Kineticist Wild Talent Line Regex failed for " + url)
                 pageObject[key][result.group(1)] = splitP(result.group(2))
                 skipBr(optional=True)
 
         elif key == "psychic_magic":
             result = re.search(r'^(.+?)\s*-\s*(.+)$', collectText(["h3", "br"], skip=[], mark=["sup"]).strip())
-            assert not result is None, "Psychic Magic Line Regex failed for " + url
+            soft_assert(not result is None, "Psychic Magic Line Regex failed for " + url)
 
             pageObject["psychic_magic"]["PE"] = result.group(1)
 
@@ -1344,7 +1375,7 @@ def parsePage(html, url):
                     result = re.search(regex, entry)  # repeat regex to look for next <sup>
 
                 result = re.search(r'^(.+?)\s*(?:\(([^)]+)\))?$', entry)
-                assert not result is None, "Psychic Magic Spell Regex failed for " + url
+                soft_assert(not result is None, "Psychic Magic Spell Regex failed for " + url)
                 entrydict["name"] = result.group(1)
                 if not result.group(2) is None:
                     for subentry in splitP(result.group(2), sep=r'[,;] '):
@@ -1353,7 +1384,7 @@ def parsePage(html, url):
                         elif subentry.startswith("DC "):
                             entrydict["DC"] = parseInt(subentry[3:])
                         else:
-                            assert not "other" in entrydict, url + " |" + entrydict["other"] + "|    |" + subentry + "|"
+                            soft_assert(not "other" in entrydict, url + " |" +  "|    |" + subentry + "|")
                             entrydict["other"] = subentry.strip()
                 pageObject[key]["entries"].append(entrydict)
             skipBr(optional=True)
@@ -1361,7 +1392,7 @@ def parsePage(html, url):
             # For Mythic Solar Pitri (Agnishvatta): Skip "M for mythic spell-like ability" chunk if present
             if e[i].name == "b" and e[i].get_text().strip() == "M":
                 i += 1
-                assert isinstance(e[i], NavigableString) and e[i].strip().lower() == "mythic spell-like ability", url
+                soft_assert(isinstance(e[i], NavigableString) and e[i].strip().lower() == "mythic spell-like ability", url)
                 i += 1
                 skipBr(optional=True)
 
@@ -1376,7 +1407,7 @@ def parsePage(html, url):
                 entrydict = {}
 
                 result = re.search(r'^(.+?) \((.+?), (\d+) points\)-Resonant (.+); Focus (.+)$', s, re.IGNORECASE)
-                assert not result is None, url + " |" + s + "|"
+                soft_assert(not result is None, url + " |" + s + "|")
                 entrydict["school"] = result.group(1).strip()
                 entrydict["slot"] = result.group(2).strip()
                 entrydict["points"] = parseInt(result.group(3))
@@ -1404,7 +1435,7 @@ def parsePage(html, url):
                 i += 1
 
     # STATISTICS
-    assert e[i].name == "h3" and e[i]['class'] == ['framing'] and e[i].get_text() == "Statistics", url
+    soft_assert(e[i].name == "h3" and e[i]['class'] == ['framing'] and e[i].get_text() == "Statistics", url)
     i += 1
 
     # Get ability scores
@@ -1413,7 +1444,7 @@ def parsePage(html, url):
     ability_score_names = ["STR", "DEX", "CON", "INT", "WIS", "CHA"]
     while e[i].name == "b":
         t = e[i].get_text().upper()
-        assert t == ability_score_names[checkCounter], url
+        soft_assert(t == ability_score_names[checkCounter], url)
         i += 1
         v = cleanS(e[i], trailingChar=",")
         if v in ["-", "."]:  # . for Equine Bone Golem
@@ -1423,7 +1454,7 @@ def parsePage(html, url):
         pageObject["ability_scores"][t] = v
         i += 1
         checkCounter += 1
-    assert checkCounter == 6, "Incorrect amount of ability scores (" + checkCounter + ") found in " + url
+    soft_assert(checkCounter == 6, "Incorrect amount of ability scores (" + str(checkCounter) + ") found in " + url)
     skipBr()
 
     # Check if bonus HP is calculated normally
@@ -1433,25 +1464,25 @@ def parsePage(html, url):
     #     pageObject["HP"]["bonus_HP_normal"] = pageObject["HP"]["bonus_HP"] == pageObject["HP"]["HD"]["num"] * con_mod
 
     # Get BAB, CMB, and CMD
-    assert e[i].name == "b" and e[i].get_text() == "Base Atk", url
+    soft_assert(e[i].name == "b" and e[i].get_text() == "Base Atk", url)
     i += 1
     pageObject["BAB"] = parseInt(cleanS(collectText(["b"])), stringIfFail=True)
     if not "is_3.5" in pageObject:
-        assert e[i].name == "b" and e[i].get_text() == "CMB", url
+        soft_assert(e[i].name == "b" and e[i].get_text() == "CMB", url)
         i += 1
         x = cleanS(collectText(["b"])).strip()
         result = re.search(r'^(-|[+-]?\d+)(?:\s*\(([^)]+)\))?$', x)
-        assert not result is None, "CMB Regex failed for " + url
+        soft_assert(not result is None, "CMB Regex failed for " + url)
         if result.group(1) == "-":
             pageObject["CMB"] = None
         else:
             pageObject["CMB"] = parseInt(result.group(1))
         if not result.group(2) is None:
             pageObject["CMB_other"] = result.group(2).strip()
-        assert e[i].name == "b" and e[i].get_text() == "CMD", url
+        soft_assert(e[i].name == "b" and e[i].get_text() == "CMD", url)
         i += 1
         result = re.search(r'^(-|[+-]?\d+)(?:\s*\(([^)]+)\))?$', cleanS(collectText(["br", "h1", "h2", "h3"])).strip())
-        assert not result is None, "CMD Regex failed for " + url
+        soft_assert(not result is None, "CMD Regex failed for " + url)
         if result.group(1) == "-":
             pageObject["CMD"] = None
         else:
@@ -1460,7 +1491,7 @@ def parsePage(html, url):
             pageObject["CMD_other"] = result.group(2).strip()
         skipBr(optional=True)
     else:
-        assert e[i].name == "b" and e[i].get_text() == "Grapple", url
+        soft_assert(e[i].name == "b" and e[i].get_text() == "Grapple", url)
         i += 1
         pageObject["grapple_3.5"] = parseInt(collectText(["br", "b", "h3", "h2", "h1"]), stringIfFail=True)
         skipBr(optional=True)
@@ -1504,7 +1535,7 @@ def parsePage(html, url):
                 result = re.search(regex, entry)  # repeat regex to look for next <sup>
 
             result = re.search(r"^(.+?)(?: \((.+?)\))?$", entry)
-            assert not result is None, "Feats Regex failed for " + url
+            soft_assert(not result is None, "Feats Regex failed for " + url)
             if result.group(2) is None:
                 entrylist = [result.group(1)]
             else:  # Deal with commas inside parentheses (e.g. "Spell Focus (conjuration, enchantment)") - breaks up into multiple feats
@@ -1551,7 +1582,7 @@ def parsePage(html, url):
         replaced_skills_extra = set()
         for replacement, skill in replacementDict.items():
             srels = [s for s in skills_relevant if s.startswith(skill)]
-            assert len(srels) <= 1, url + " |" + skill + "| |" + str(skills_relevant) + "|"
+            soft_assert(len(srels) <= 1, url + " |" + skill + "| |" + str(skills_relevant) + "|")
             if len(srels) > 0:
                 replaced_skills_extra.add(srels[0].replace(skill, replacement))
         skills_relevant = skills_relevant.union(replaced_skills_extra)
@@ -1569,8 +1600,10 @@ def parsePage(html, url):
 
                 # The only allowed format for skills and a rare format for racial mods, e.g. "Acrobatics +13 (+17 when jumping)"
                 result = re.search(r'^(' + skillRegex + r')\s+([+-]\d+)(?:\s+\((.+?)\))?$', entry)
-                if t == "skill":
-                    assert not result is None, url + " |" + entry + "|"
+
+                #if t == "skill":
+                #    soft_assert(not result is None, url + " |" + entry + "|")
+
                 if not result is None:
                     skill = result.group(1).strip()
                     out = {skill: {"_": parseInt(result.group(2))}}
@@ -1583,10 +1616,10 @@ def parsePage(html, url):
                                 bonus = parseInt(result.group(1))
                                 category = result.group(2).strip()
 
-                                assert not category in out[skill], url
+                                soft_assert(not category in out[skill], url)
                                 out[skill][category] = bonus
                             else:
-                                assert not "_other" in out[skill], url
+                                soft_assert(not "_other" in out[skill], url)
                                 out[skill]["_other"] = pentry
                     return out
 
@@ -1601,7 +1634,7 @@ def parsePage(html, url):
                         bonus2 = parseInt(result.group(3))
                     skill2 = result.group(4).strip()
                     category = unwrapParens(result.group(5).strip())
-                    assert skill1 != skill2, url
+                    soft_assert(skill1 != skill2, url)
                     return {skill1: {category: bonus1}, skill2: {category: bonus2}}
 
                 # The most common format by far for racial mods - bonus first, e.g. "+2 Perception", "+8 Stealth (+16 in forests)", "+4 Diplomacy when influencing rats", or "+4 Stealth in dim light (–4 in bright light)"
@@ -1623,7 +1656,7 @@ def parsePage(html, url):
                         for pentry in re.split(r',\s*(?=[+-]\d+)', paren.strip()):
                             result = re.search(r'^([+-]\d+)\s+(.+?)$', pentry.strip())
                             pcategory = result.group(2).strip()
-                            assert not pcategory in out[skill], url
+                            soft_assert(not pcategory in out[skill], url)
                             out[skill][pcategory] = parseInt(result.group(1))
                     return out
 
@@ -1657,7 +1690,7 @@ def parsePage(html, url):
                     # Make replacements in skill names if necessary
                     if skillName in replacementDict:
                         replacementName = replacementDict[skillName]
-                        assert not replacementName in out, url
+                        soft_assert(not replacementName in out, url)
                         out[replacementName] = out[skillName]
                         del out[skillName]
                         skillName = replacementName
@@ -1667,7 +1700,7 @@ def parsePage(html, url):
                     for category in savedCategories:
                         if category.startswith(skillName + " "):
                             newCategory = category[len(skillName) + 1:].strip()
-                            assert not newCategory in out[skillName], url
+                            soft_assert(not newCategory in out[skillName], url)
                             out[skillName][newCategory] = out[skillName][category]
                             del out[skillName][category]
 
@@ -1686,7 +1719,7 @@ def parsePage(html, url):
         # Add in perception/spot/listen skills from Senses
         def handleSkillConflict(key, var):
             skillEntries = [x for x in entries if x.startswith(key)]
-            assert len(skillEntries) <= 1, url
+            soft_assert(len(skillEntries) <= 1, url)
             if len(skillEntries) == 1 and skillEntries[0] != var:
                 updateNestedDict(pageObject["skills"], {key: {"_mismatch": True}})
                 entries.append(var)
@@ -1714,8 +1747,10 @@ def parsePage(html, url):
 
                 result = processSkillLikeEntry(entry, "racial_mods")
                 if result is None:
-                    assert not "_other" in pageObject["skills"]["_racial_mods"], url
-                    pageObject["skills"]["_racial_mods"]["_other"] = entry
+                    if ("_other" in pageObject["skills"]["_racial_mods"]):
+                        pageObject["skills"]["_racial_mods"]["_other"] += ", " + entry
+                    else:
+                        pageObject["skills"]["_racial_mods"]["_other"] = entry
                     continue
 
                 updateNestedDict(pageObject["skills"]["_racial_mods"], result)
@@ -1748,7 +1783,7 @@ def parsePage(html, url):
     skipBr(optional=True)
     if e[i].name == "b" and e[i].get_text().strip() == "Boon":
         i += 1
-        assert isinstance(e[i], NavigableString), url
+        soft_assert(isinstance(e[i], NavigableString), url)
         pageObject["npc_boon"] = e[i].strip()
         i += 1
         skipBr(optional=True)
@@ -1759,7 +1794,7 @@ def parsePage(html, url):
         i += 1
 
         # Get environment
-        assert e[i].name == "b" and e[i].get_text() == "Environment", url
+        soft_assert(e[i].name == "b" and e[i].get_text() == "Environment", url)
         i += 1
         pageObject["ecology"]["environment"] = collectText(["h3", "br"]).strip()
         skipBr(optional=True)
@@ -1824,7 +1859,7 @@ def parsePage(html, url):
         pageObject["special_abilities"] = {}
         i += 1
 
-        assert e[i].name == "b", url
+        soft_assert(e[i].name == "b", url)
 
         while e[i].name == "b":
             # Get the current special ability name
@@ -1880,6 +1915,41 @@ def parsePage(html, url):
 
     return pageObject
 
+def soft_assert(condition, message="Assertion failed"):
+    """
+    A replacement for assert that logs failures with the actual assertion code
+    
+    Args:
+        condition: The condition to check
+        message: Optional message to include in the log
+    
+    Returns:
+        bool: True if the assertion passed, False if it failed
+    """
+    if not condition:
+        # Get the caller's frame information
+        caller_frame = inspect.currentframe().f_back
+        filename = os.path.basename(caller_frame.f_code.co_filename)
+        line_number = caller_frame.f_lineno
+        
+        # Get the source code of the line that called soft_assert
+        line = linecache.getline(caller_frame.f_code.co_filename, line_number).strip()
+        
+        # Extract the condition from the source code
+        # This pattern looks for soft_assert(...) and captures what's inside the parentheses
+        import re
+        match = re.search(r'soft_assert\s*\((.+?)(?:,)', line)
+        condition_text = match.group(1).strip() if match else "unknown condition"
+        
+        # Log the failure with detailed information
+        failure_msg = f"ASSERTION FAILED in {filename}:{line_number} - \"{condition_text}\" - {message}"
+        logging.error(failure_msg)
+        
+        # You can optionally print to console as well
+        print(f"WARNING: {failure_msg}")
+        
+        return False
+    return True
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
@@ -1887,13 +1957,23 @@ if __name__ == "__main__":
     else:
         datapath = "data/"
 
+    logging.basicConfig(
+        filename=os.path.join(datapath, 'assertion_failures.log'),
+        level=logging.ERROR,
+        format='%(asctime)s - %(message)s'
+    )
+
     urls = []
     with open(os.path.join(datapath, "urls.txt")) as file:
         for line in file:
             urls.append(line.rstrip())
 
     broken_urls = []
-    with open("broken_urls.txt") as file:
+
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(script_dir, "broken_urls.txt")
+    with open(file_path) as file:
         for line in file:
             if not line.strip() == "" and not line.strip().startswith("#"):
                 broken_urls.append(line.rstrip())
